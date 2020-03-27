@@ -293,6 +293,10 @@ public class Grid {
             for(int y_iterator = 0; y_iterator < y_size; y_iterator++){
                 int el = grid[x_iterator][y_iterator];
 
+                if(specialGrid[x_iterator][y_iterator] == 5){
+                    specialGrid[x_iterator][y_iterator] = 0;
+                }
+
                 if(elementToRemove == el){
                     int yToTop = y_iterator;
                     while(yToTop > 0){
