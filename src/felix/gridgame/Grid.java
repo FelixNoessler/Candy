@@ -167,9 +167,9 @@ public class Grid {
             //if(mouseClick) points += y_end - y_start + 1;
 
             removeFromCol(y_start, y_end, x_col);
-            return true;
+            return true; // changes!
         }
-        return false;
+        return false; // no changes
     }
 
     private void removeFromCol(int y_start, int y_end, int col){

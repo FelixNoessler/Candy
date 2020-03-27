@@ -25,11 +25,10 @@ public class Cell_JFrame extends JFrame {
         JTextField fieldYSize = new JTextField("15", 10);
         fieldYSize.setBounds(320, y_cells[0] * 30 + 30, 50, 30);
         this.add(fieldYSize);
+
         // Button for restart
         JButton button = new JButton("start");
         button.setBounds(10, y_cells[0] * 30 + 30, 100, 30);
-        //button.setFocusPainted(false);
-        //button.setContentAreaFilled(false);
         this.add(button);
         button.addActionListener(e -> {
             x_cells[0] = Integer.parseInt(fieldXSize.getText());
@@ -64,7 +63,6 @@ public class Cell_JFrame extends JFrame {
     }
 
     public static void main(String [] args) {
-
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
