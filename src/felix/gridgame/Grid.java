@@ -1,11 +1,9 @@
 package felix.gridgame;
 
-import java.awt.*;
 import java.util.Random;
 
 
 public class Grid {
-
     private int[][] grid;
     private int numberOfColors;
     private int x_size, y_size;
@@ -39,6 +37,67 @@ public class Grid {
     }
 
 
+    public boolean checkGrid(){
+        // true = changes!, false = no changes
+        if(checkGridHorizontal()) return true;
+        return checkGridVertical();
+    }
+
+
+    private boolean checkGridHorizontal() {
+        int horizontalRepeats = 1;
+        int lastNumber;
+        int actualNumber;
+        int x_col = 0, y_row = 0;
+        boolean breakLoop = false;
+
+        y_outerloop:
+        for (int y_iterator = 0; y_iterator < y_size; y_iterator++) {
+            for (int x_iterator = 0; x_iterator < x_size; x_iterator++) {
+
+                actualNumber = grid[x_iterator][y_iterator];
+
+                if (x_iterator - 1 < 0) lastNumber = 999;
+                else lastNumber = grid[x_iterator - 1][y_iterator];
+
+                if (actualNumber == lastNumber) {
+                    horizontalRepeats++;
+                } else horizontalRepeats = 1;
+
+                if (horizontalRepeats == 3) {
+
+                    //check for more of the same color in the row:
+                    int i = 1;
+                    while (true) {
+                        //checks that we are in the grid
+                        if ((x_iterator + i) > (x_size - 1)) break;
+
+                        int nextNumber = grid[x_iterator + i][y_iterator];
+
+                        if (nextNumber == actualNumber) horizontalRepeats++;
+                        else break;
+                        i++;
+                    }
+
+                    x_col = x_iterator;
+                    y_row = y_iterator;
+                    breakLoop = true;
+                    break y_outerloop;
+                }
+            }
+        }
+        if(breakLoop) {
+            int x_end = x_col;
+            if(horizontalRepeats > 3) x_end += horizontalRepeats-3;
+            int x_start = (x_end - (horizontalRepeats-1));
+
+            //if(mouseClick) points += x_end - x_start + 1;
+            removeFromRow(x_start, x_end, y_row);
+            return true; // changes!
+        }
+
+        return false; // no change!
+    }
 
     private void removeFromRow(int x_start, int x_end, int row) {
         for(int y_iterator = row; y_iterator >= 0; y_iterator--){
@@ -56,84 +115,8 @@ public class Grid {
     }
 
 
-    private void removeFromCol(int y_start, int y_end, int col){
-        int dif = y_end - y_start;
-        for(int y_iterator = y_end; y_iterator >= 0; y_iterator--){
-            if( (y_iterator-dif) >= 0){
-                grid[col][y_iterator] = grid[col][y_iterator-dif];
-            }
-            else{
-                grid[col][y_iterator] = r.nextInt(numberOfColors);
-            }
-        }
-    }
 
-
-    public boolean checkGrid(boolean mouseClick){
-        boolean hor = checkGridHorizontal(mouseClick);
-        if(!hor) return false;
-        return checkGridVertical(mouseClick);
-    }
-
-
-    private boolean checkGridHorizontal(boolean mouseClick) {
-        int horiz = 1;
-        int lastNumber;
-        int actualNumber;
-        int x_col = 0, y_row = 0;
-        boolean breakLoop = false;
-
-        y_outerloop:
-        for (int y_iterator = 0; y_iterator < y_size; y_iterator++) {
-            for (int x_iterator = 0; x_iterator < x_size; x_iterator++) {
-
-                actualNumber = grid[x_iterator][y_iterator];
-
-                if (x_iterator - 1 < 0) lastNumber = 999;
-                else lastNumber = grid[x_iterator - 1][y_iterator];
-
-                if (actualNumber == lastNumber) {
-                    horiz++;
-                } else horiz = 1;
-
-                if (horiz == 3) {
-
-                    //check for more of the same color in the row:
-                    int i = 1;
-                    while (true) {
-                        //checks that we are in the grid
-                        if ((x_iterator + i) > (x_size - 1)) break;
-
-                        int nextNumber = grid[x_iterator + i][y_iterator];
-
-                        if (nextNumber == actualNumber) horiz++;
-                        else break;
-                        i++;
-                    }
-
-                    x_col = x_iterator;
-                    y_row = y_iterator;
-                    breakLoop = true;
-                    break y_outerloop;
-                }
-            }
-        }
-        if(breakLoop) {
-            int x_end = x_col;
-            if(horiz > 3) x_end += horiz-3;
-            int x_start = (x_end - (horiz-1));
-
-            //if(mouseClick) points += x_end - x_start + 1;
-            removeFromRow(x_start, x_end, y_row);
-            return true;
-            //repaint();
-        }
-
-        return false;
-    }
-
-
-    private boolean checkGridVertical(boolean mouseClick) {
+    private boolean checkGridVertical() {
         int verticalRepeats = 1;
         int lastNumber;
         int actualNumber;
@@ -185,8 +168,19 @@ public class Grid {
 
             removeFromCol(y_start, y_end, x_col);
             return true;
-            //repaint();
         }
         return false;
+    }
+
+    private void removeFromCol(int y_start, int y_end, int col){
+        int dif = y_end - y_start;
+        for(int y_iterator = y_end; y_iterator >= 0; y_iterator--){
+            if( (y_iterator-dif) >= 0){
+                grid[col][y_iterator] = grid[col][y_iterator-dif];
+            }
+            else{
+                grid[col][y_iterator] = r.nextInt(numberOfColors);
+            }
+        }
     }
 }

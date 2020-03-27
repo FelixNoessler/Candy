@@ -51,22 +51,22 @@ public class Cell_JPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 int getX = (e.getX()-10) / 30;
                 int getY = (e.getY()-10) / 30;
-
+                System.out.println("("+getX + "," + getY+")");
                 x_clicked.add(getX);
                 y_clicked.add(getY);
 
                 if(x_clicked.size() > 1){
-                    removed = false;
                     changePosition(false);
-                    gridCalculate.checkGrid(true);
-                    pointLabel.setText(String.valueOf(points));
 
-                    if(!removed){
-                        changePosition(true);
-                    } else {
+                    if(gridCalculate.checkGrid()) {
+                        repaint();
+                        pointLabel.setText(String.valueOf(points));
+
                         //empty clicked Arraylist to avoid not wanted clicks
                         x_clicked.clear();
                         y_clicked.clear();
+                    } else{
+                        changePosition(true);
                     }
                 }
             }
@@ -90,6 +90,7 @@ public class Cell_JPanel extends JPanel {
         this.setSize(width_panel, height_panel);
     }
 
+    //for the creation of a new field..............
     public void setPoints(int points) {
         this.points = points;
     }
@@ -106,7 +107,7 @@ public class Cell_JPanel extends JPanel {
         this.x_size = x;
         this.y_size = y;
     }
-
+    // end of creation of a new field...............
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -118,7 +119,7 @@ public class Cell_JPanel extends JPanel {
         }
         firstTime = false;
         drawGrid(g);
-        gridCalculate.checkGrid(false);
+        if(gridCalculate.checkGrid()) repaint();
     }
 
     private void drawGrid(Graphics g){
@@ -173,9 +174,8 @@ public class Cell_JPanel extends JPanel {
             if(y1 == y2 | y1 == (y2+1) | y1 == (y2-1)) {
                 int save = gridCalculate.getGrid(x1,y1);
 
-                gridCalculate.setGrid(gridCalculate.getGrid(x1,y1),x1,y1);
-                gridCalculate.setGrid(save,x1,y1);
-                repaint();
+                gridCalculate.setGrid(gridCalculate.getGrid(x2,y2),x1,y1);
+                gridCalculate.setGrid(save,x2,y2);
             }
         }
 
