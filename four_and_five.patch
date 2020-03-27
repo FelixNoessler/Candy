@@ -1,0 +1,445 @@
+Index: src/felix/gridgame/Grid.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/felix/gridgame/Grid.java	(revision d5ab2a2d36d4c21a45a93d39b75ce1bd81f15a60)
++++ src/felix/gridgame/Grid.java	(date 1585349782154)
+@@ -12,39 +12,45 @@
+     private Random r = new Random();
+ 
+ 
+-    public Grid(int x_size, int y_size, int numberOfColors){
++    public Grid(int x_size, int y_size, int numberOfColors) {
+         this.x_size = x_size;
+         this.y_size = y_size;
+         this.numberOfColors = numberOfColors;
+     }
+ 
+-    public int getPoints(){ return this.points; }
++    public int getPoints() {
++        return this.points;
++    }
+ 
+-    public int getSpecialGrid(int x, int y){ return this.specialGrid[x][y];}
++    public int getSpecialGrid(int x, int y) {
++        return this.specialGrid[x][y];
++    }
+ 
+-    public void setSpecialGrid(int element, int x, int y){ this.specialGrid[x][y] = element;}
++    public void setSpecialGrid(int element, int x, int y) {
++        this.specialGrid[x][y] = element;
++    }
+ 
+-    public void setPointsToZero(){
++    public void setPointsToZero() {
+         this.points = 0;
+     }
+ 
+-    public void setGrid(int value, int x, int y){
++    public void setGrid(int value, int x, int y) {
+         grid[x][y] = value;
+     }
+ 
+-    public int getGrid(int x, int y){
++    public int getGrid(int x, int y) {
+         return grid[x][y];
+     }
+ 
+ 
+-    public void generateRandomArray(){
++    public void generateRandomArray() {
+         grid = new int[x_size][y_size];
+ 
+         // set the special array to 0's
+         specialGrid = new int[x_size][y_size];
+ 
+-        for(int x_iterator = 0; x_iterator < x_size; x_iterator++){
+-            for(int y_iterator = 0; y_iterator < y_size; y_iterator++){
++        for (int x_iterator = 0; x_iterator < x_size; x_iterator++) {
++            for (int y_iterator = 0; y_iterator < y_size; y_iterator++) {
+                 grid[x_iterator][y_iterator] = r.nextInt(numberOfColors);
+                 specialGrid[x_iterator][y_iterator] = 0;
+             }
+@@ -52,10 +58,10 @@
+     }
+ 
+ 
+-    public boolean checkGrid(int x1, int x2, int y1, int y2, boolean mouseClick){
++    public boolean checkGrid(int x1, int x2, int y1, int y2, boolean mouseClick) {
+         // true = changes!, false = no changes
+-        if(checkGridHorizontal(x1, x2, mouseClick)) return true;
+-        return checkGridVertical(x1, x2, y1, y2, mouseClick);
++        if (checkGridHorizontal(x1, x2, mouseClick)) return true;
++        return checkGridVertical(y1, y2, mouseClick);
+     }
+ 
+ 
+@@ -85,8 +91,9 @@
+                     }
+ 
+                 } else {
+-                    isFour = false;
+                     horizontalRepeats = 1;
++
++                    isFour = false;
+                 }
+ 
+                 if (horizontalRepeats == 3) {
+@@ -111,19 +118,20 @@
+                 }
+             }
+         }
+-        if(breakLoop) {
++        if (breakLoop) {
+             int x_end = x_col;
+-            if(horizontalRepeats > 3) x_end += horizontalRepeats-3;
+-            int x_start = (x_end - (horizontalRepeats-1));
++            if (horizontalRepeats > 3) x_end += horizontalRepeats - 3;
++            int x_start = (x_end - (horizontalRepeats - 1));
+ 
+-            if(mouseClick) points += x_end - x_start + 1;
++            if (mouseClick) points += x_end - x_start + 1;
+ 
+-            if(!mouseClick) {
+-                x1 = x_start+1;
+-                x2 = x_start+1;
++            if (!mouseClick) {
++                x1 = x_start + 1;
++                x2 = x_start + 1;
+             }
+ 
+-            removeFromRow(x1, x2, x_start, x_end, y_row);
++            if (isFour) combineFour(y_row, false);
++            else removeFromRow(x1, x2, x_start, x_end, y_row);
+ 
+             return true; // changes!
+         }
+@@ -133,36 +141,36 @@
+ 
+     private void removeFromRow(int click1, int click2, int x_start, int x_end, int row) {
+         int dif = x_end - x_start;
+-        int element = grid[x_start+1][row];
++        int element = grid[x_start + 1][row];
+ 
+-        for(int y_iterator = row; y_iterator >= 0; y_iterator--){
+-            for(int x_iterator = x_start; x_iterator <= x_end; x_iterator++){
+-                if(y_iterator == 0){
++        for (int y_iterator = row; y_iterator >= 0; y_iterator--) {
++            for (int x_iterator = x_start; x_iterator <= x_end; x_iterator++) {
++                if (y_iterator == 0) {
+                     grid[x_iterator][y_iterator] = r.nextInt(numberOfColors);
+-                }else {
+-                    grid[x_iterator][y_iterator] = grid[x_iterator][y_iterator-1];
++                } else {
++                    grid[x_iterator][y_iterator] = grid[x_iterator][y_iterator - 1];
+                 }
+             }
+         }
+ 
++        // check where where we should place an four/five elemnt
+         boolean isClick1 = false;
+ 
+-        for(int i = 0; i <= dif; i ++){
+-            if((x_start + i) == click1) {
++        for (int i = 0; i <= dif; i++) {
++            if ((x_start + i) == click1) {
+                 isClick1 = true;
+                 break;
+             }
+         }
+ 
+         int xRemove;
+-        if(isClick1) xRemove = click1;
++        if (isClick1) xRemove = click1;
+         else xRemove = click2;
+ 
+-        if((dif+1) == 4) {
++        if ((dif + 1) == 4) {
+             System.out.println("Four!!!");
+             setSpecialElement(element, xRemove, row, true);
+-        }
+-        else if((dif+2) >= 5) {
++        } else if ((dif + 2) >= 5) {
+             System.out.println("Five!!!");
+             setSpecialElement(element, xRemove, row, false);
+         }
+@@ -170,8 +178,9 @@
+     }
+ 
+ 
++    private boolean checkGridVertical(int y1, int y2, boolean mouseClick) {
++        boolean isFour = false;
+ 
+-    private boolean checkGridVertical(int x1, int x2, int y1, int y2, boolean mouseClick) {
+         int verticalRepeats = 1;
+         int lastNumber;
+         int actualNumber;
+@@ -184,11 +193,19 @@
+                 actualNumber = grid[x_iterator][y_iterator];
+ 
+                 if (y_iterator - 1 < 0) lastNumber = 999;
+-                else lastNumber = grid[x_iterator][y_iterator-1];
++                else lastNumber = grid[x_iterator][y_iterator - 1];
+ 
+                 if (actualNumber == lastNumber) {
+                     verticalRepeats++;
+-                } else verticalRepeats = 1;
++
++                    if (specialGrid[x_iterator][y_iterator] == 4) {
++                        isFour = true;
++                    }
++
++                } else {
++                    verticalRepeats = 1;
++                    isFour = false;
++                }
+ 
+                 if (verticalRepeats == 3) {
+ 
+@@ -199,7 +216,7 @@
+                         //checks that we are in the grid
+                         if ((y_iterator + i) > (y_size - 1)) break;
+ 
+-                        int nextNumber = grid[x_iterator][y_iterator+1];
++                        int nextNumber = grid[x_iterator][y_iterator + 1];
+ 
+                         if (nextNumber == actualNumber) verticalRepeats++;
+                         else break;
+@@ -213,64 +230,84 @@
+                 }
+             }
+         }
+-        if(breakLoop) {
++        if (breakLoop) {
+             int y_end = y_row;
+ 
+-            if(verticalRepeats > 3) y_end += verticalRepeats-3;
+-            int y_start = (y_end - (verticalRepeats-1));
++            if (verticalRepeats > 3) y_end += verticalRepeats - 3;
++            int y_start = (y_end - (verticalRepeats - 1));
+ 
+-            if(mouseClick) points += y_end - y_start + 1;
++            if (mouseClick) points += y_end - y_start + 1;
+ 
+-            removeFromCol(y_start, y_end, x_col);
++            if (!mouseClick) {
++                y1 = y_start + 1;
++                y2 = y_start + 1;
++            }
++
++            if (isFour) combineFour(x_col, true);
++            else removeFromCol(y1, y2, y_start, y_end, x_col);
+ 
+             return true; // changes!
+         }
+         return false; // no changes
+     }
+ 
+-    private void removeFromCol(int y_start, int y_end, int col){
++
++    private void removeFromCol(int click1, int click2, int y_start, int y_end, int col) {
+         int dif = y_end - y_start;
+-        int element = grid[col][y_start+1];
++        int element = grid[col][y_start + 1];
+ 
+-        for(int y_iterator = y_end; y_iterator >= 0; y_iterator--){
+-            if( (y_iterator-dif) >= 0){
+-                grid[col][y_iterator] = grid[col][y_iterator-dif];
+-            }
+-            else{
++        for (int y_iterator = y_end; y_iterator >= 0; y_iterator--) {
++            if ((y_iterator - dif) >= 0) {
++                grid[col][y_iterator] = grid[col][y_iterator - dif];
++            } else {
+                 grid[col][y_iterator] = r.nextInt(numberOfColors);
+             }
+         }
+ 
+-        if((dif+1) == 4) {
++        boolean isClick1 = false;
++
++        for (int i = 0; i <= dif; i++) {
++            if ((y_start + i) == click1) {
++                isClick1 = true;
++                return;
++            }
++        }
++
++        int yRemove;
++        if (isClick1) yRemove = click1;
++        else yRemove = click2;
++
++
++        if ((dif + 1) == 4) {
+             System.out.println("Four!!!");
+-            setSpecialElement(element, col, y_start+1, true);
+-        }
+-        else if((dif+2) >= 5) {
++            setSpecialElement(element, col, yRemove, true);
++        } else if ((dif + 2) >= 5) {
+             System.out.println("Five!!!");
+-            setSpecialElement(element, col, y_start+1, false);
++            setSpecialElement(element, col, yRemove, false);
+         }
+     }
++
+ 
+-    private void setSpecialElement(int element, int x, int y, boolean isFour){
++    private void setSpecialElement(int element, int x, int y, boolean isFour) {
+         // four Elements in one row/col
+-        if(isFour) specialGrid[x][y] = 4;
++        if (isFour) specialGrid[x][y] = 4;
+ 
+-        // five elements in one row/col
++            // five elements in one row/col
+         else specialGrid[x][y] = 5;
+ 
+         grid[x][y] = element;
+     }
+ 
+-    public void combineFive(int elementToRemove){
+-
+-        for(int x_iterator = 0; x_iterator < x_size; x_iterator++){
+-            for(int y_iterator = 0; y_iterator < y_size; y_iterator++){
++
++    public void combineFive(int elementToRemove) {
++        for (int x_iterator = 0; x_iterator < x_size; x_iterator++) {
++            for (int y_iterator = 0; y_iterator < y_size; y_iterator++) {
+                 int el = grid[x_iterator][y_iterator];
+ 
+-                if(elementToRemove == el){
++                if (elementToRemove == el) {
+                     int yToTop = y_iterator;
+-                    while(yToTop > 0){
+-                        grid[x_iterator][yToTop] = grid[x_iterator][yToTop-1];
++                    while (yToTop > 0) {
++                        grid[x_iterator][yToTop] = grid[x_iterator][yToTop - 1];
+                         yToTop--;
+                     }
+ 
+@@ -280,27 +317,28 @@
+         }
+     }
+ 
+-    public void combineFour(int rowOrCol, boolean isLine){
+-        if(isLine){
+-            // remove line
+-            for(int i = 0; i < x_size; i++)
+-                for(int toTop = rowOrCol; toTop >= 0; toTop--) {
+-                    if(toTop != 0) {
++
++    public void combineFour(int rowOrCol, boolean isLine) {
++        if (isLine) {
++            System.out.println("Remove line");
++            for (int i = 0; i < x_size; i++) {
++                for (int toTop = rowOrCol; toTop >= 0; toTop--) {
++                    if (toTop != 0) {
+                         grid[i][toTop] = grid[i][toTop - 1];
+-                    }else {
++                    } else {
+                         grid[i][toTop] = r.nextInt(numberOfColors);
+                     }
+                 }
+             }
+ 
+-
+-            System.out.println("REmove line");
+         } else {
+             // remove column
+-            System.out.println("REmove column");
++            System.out.println("Remove column");
++
++            for (int i = 0; i < y_size; i++) {
++                grid[i][rowOrCol] = r.nextInt(numberOfColors);
++            }
+         }
+-
+-        r.nextInt(numberOfColors);
+ 
+     }
+ 
+Index: .idea/inspectionProfiles/Project_Default.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/inspectionProfiles/Project_Default.xml	(date 1585349155222)
++++ .idea/inspectionProfiles/Project_Default.xml	(date 1585349155222)
+@@ -0,0 +1,10 @@
++<component name="InspectionProjectProfileManager">
++  <profile version="1.0">
++    <option name="myName" value="Project Default" />
++    <inspection_tool class="DuplicatedCode" enabled="true" level="WEAK WARNING" enabled_by_default="true">
++      <Languages>
++        <language minSize="60" name="Java" />
++      </Languages>
++    </inspection_tool>
++  </profile>
++</component>
+\ No newline at end of file
+diff --git out/production/testGame/felix/gridgame/Grid.class out/production/testGame/felix/gridgame/Grid.class
+index f6dc2052acffa968cef14d354639853b40a189dc..6e3e988cd82dd31c67334ac73a85639fa82b128f
+GIT binary patch
+literal 5843
+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
+
