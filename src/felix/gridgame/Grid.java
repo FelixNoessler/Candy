@@ -8,6 +8,8 @@ public class Grid {
     private int numberOfColors;
     private int x_size, y_size;
 
+    public int points = 0;
+
     private static final Random r = new Random();
 
 
@@ -25,6 +27,10 @@ public class Grid {
         return grid[x][y];
     }
 
+    public int getPoints(){
+        return this.points;
+    }
+
 
     public void generateRandomArray(){
         grid = new int[x_size][y_size];
@@ -37,14 +43,14 @@ public class Grid {
     }
 
 
-    public boolean checkGrid(){
+    public boolean checkGrid(boolean mouseClick){
         // true = changes!, false = no changes
-        if(checkGridHorizontal()) return true;
-        return checkGridVertical();
+        if(checkGridHorizontal(mouseClick)) return true;
+        return checkGridVertical(mouseClick);
     }
 
 
-    private boolean checkGridHorizontal() {
+    private boolean checkGridHorizontal(boolean mouseClick) {
         int horizontalRepeats = 1;
         int lastNumber;
         int actualNumber;
@@ -91,7 +97,8 @@ public class Grid {
             if(horizontalRepeats > 3) x_end += horizontalRepeats-3;
             int x_start = (x_end - (horizontalRepeats-1));
 
-            //if(mouseClick) points += x_end - x_start + 1;
+            if(mouseClick) points += x_end - x_start + 1;
+
             removeFromRow(x_start, x_end, y_row);
             return true; // changes!
         }
@@ -116,7 +123,7 @@ public class Grid {
 
 
 
-    private boolean checkGridVertical() {
+    private boolean checkGridVertical(boolean mouseClick) {
         int verticalRepeats = 1;
         int lastNumber;
         int actualNumber;
@@ -164,9 +171,10 @@ public class Grid {
             if(verticalRepeats > 3) y_end += verticalRepeats-3;
             int y_start = (y_end - (verticalRepeats-1));
 
-            //if(mouseClick) points += y_end - y_start + 1;
+            if(mouseClick) points += y_end - y_start + 1;
 
             removeFromCol(y_start, y_end, x_col);
+
             return true; // changes!
         }
         return false; // no changes

@@ -22,9 +22,6 @@ public class Cell_JPanel extends JPanel {
     public boolean firstTime = true;
 
 
-    private boolean removed = false;
-
-    private int points = 0;
     private JLabel pointLabel;
 
 
@@ -43,7 +40,7 @@ public class Cell_JPanel extends JPanel {
 
         pointLabel = new JLabel();
         pointLabel.setBounds(x_size*30+20,10,20,30);
-        pointLabel.setText(String.valueOf(points));
+        pointLabel.setText("0");
         this.add(pointLabel);
 
         this.addMouseListener(new MouseListener(){
@@ -58,9 +55,9 @@ public class Cell_JPanel extends JPanel {
                 if(x_clicked.size() > 1){
                     changePosition(false);
 
-                    if(gridCalculate.checkGrid()) {
+                    if(gridCalculate.checkGrid(true)) {
                         repaint();
-                        pointLabel.setText(String.valueOf(points));
+                        pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
                         //empty clicked Arraylist to avoid not wanted clicks
                         x_clicked.clear();
@@ -91,8 +88,8 @@ public class Cell_JPanel extends JPanel {
     }
 
     //for the creation of a new field..............
-    public void setPoints(int points) {
-        this.points = points;
+    public void setPointsToZero() {
+        gridCalculate.points = 0;
     }
 
     public void setNumberOfColors(int numberOfColors){
@@ -119,7 +116,7 @@ public class Cell_JPanel extends JPanel {
         }
         firstTime = false;
         drawGrid(g);
-        if(gridCalculate.checkGrid()) repaint();
+        if(gridCalculate.checkGrid(false)) repaint();
     }
 
     private void drawGrid(Graphics g){

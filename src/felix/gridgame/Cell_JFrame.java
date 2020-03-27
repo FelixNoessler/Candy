@@ -36,7 +36,7 @@ public class Cell_JFrame extends JFrame {
             pan.setXYSize(x_cells[0], y_cells[0]);
             pan.setNumberOfColors(colors[0]);
             pan.firstTime = true;
-            pan.setPoints(0);
+            pan.setPointsToZero();
             pan.setPointLabel("0");
             pan.repaint();
         });
