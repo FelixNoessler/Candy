@@ -172,6 +172,7 @@ public class Grid {
 
 
     private boolean checkGridVertical(int x1, int x2, int y1, int y2, boolean mouseClick) {
+        boolean isFour = false;
         int verticalRepeats = 1;
         int lastNumber;
         int actualNumber;
@@ -188,7 +189,14 @@ public class Grid {
 
                 if (actualNumber == lastNumber) {
                     verticalRepeats++;
-                } else verticalRepeats = 1;
+                    if (specialGrid[x_iterator][y_iterator] == 4) {
+                        isFour = true;
+                    }
+
+                } else {
+                    verticalRepeats = 1;
+                    isFour = false;
+                }
 
                 if (verticalRepeats == 3) {
 
@@ -216,12 +224,16 @@ public class Grid {
         if(breakLoop) {
             int y_end = y_row;
 
-            if(verticalRepeats > 3) y_end += verticalRepeats-3;
-            int y_start = (y_end - (verticalRepeats-1));
+            if (verticalRepeats > 3) y_end += verticalRepeats - 3;
+            int y_start = (y_end - (verticalRepeats - 1));
 
-            if(mouseClick) points += y_end - y_start + 1;
+            if (mouseClick) points += y_end - y_start + 1;
 
-            removeFromCol(y_start, y_end, x_col);
+
+            if (isFour) {
+                combineFour(x_col, true);
+            } else removeFromCol(y_start, y_end, x_col);
+
 
             return true; // changes!
         }
@@ -300,7 +312,6 @@ public class Grid {
                 grid[i][rowOrCol] = r.nextInt(numberOfColors);
             }
         }
-
 
     }
 
