@@ -251,6 +251,7 @@ public class Grid {
         return false; // no changes
     }
 
+
     private void removeFromCol(int click1, int click2, int y_start, int y_end, int col) {
         int dif = y_end - y_start;
         int element = grid[col][y_start + 1];
@@ -286,6 +287,7 @@ public class Grid {
         }
     }
 
+
     private void setSpecialElement(int element, int x, int y, boolean isFour) {
         // four Elements in one row/col
         if (isFour) specialGrid[x][y] = 4;
@@ -296,8 +298,8 @@ public class Grid {
         grid[x][y] = element;
     }
 
-    public void combineFive(int elementToRemove) {
 
+    public void combineFive(int elementToRemove) {
         for (int x_iterator = 0; x_iterator < x_size; x_iterator++) {
             for (int y_iterator = 0; y_iterator < y_size; y_iterator++) {
                 int el = grid[x_iterator][y_iterator];
@@ -315,9 +317,9 @@ public class Grid {
         }
     }
 
+
     public void combineFour(int rowOrCol, boolean isLine) {
         if (isLine) {
-            // remove line
             System.out.println("Remove line");
             for (int i = 0; i < x_size; i++){
                 for (int toTop = rowOrCol; toTop >= 0; toTop--) {
@@ -334,5 +336,6 @@ public class Grid {
         System.out.println("Remove column");
         }
     }
+
 
 }
