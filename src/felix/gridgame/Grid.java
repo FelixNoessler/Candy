@@ -251,5 +251,18 @@ public class Grid {
         }
     }
 
-   // pulic void combinefive()
+    public void combineFour(int i, boolean isLine){
+        if(isLine){
+            // remove line
+            System.out.println("REmove line");
+        } else {
+            // remove column
+            System.out.println("REmove column");
+        }
+
+        r.nextInt(numberOfColors);
+
+    }
+
+
 }
