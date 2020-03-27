@@ -52,14 +52,14 @@ public class Grid {
     }
 
 
-    public boolean checkGrid(boolean mouseClick){
+    public boolean checkGrid(int x1, int x2, int y1, int y2, boolean mouseClick){
         // true = changes!, false = no changes
-        if(checkGridHorizontal(mouseClick)) return true;
-        return checkGridVertical(mouseClick);
+        if(checkGridHorizontal(x1, x2, mouseClick)) return true;
+        return checkGridVertical(x1, x2, y1, y2, mouseClick);
     }
 
 
-    private boolean checkGridHorizontal(boolean mouseClick) {
+    private boolean checkGridHorizontal(int x1, int x2, boolean mouseClick) {
         boolean isFour = false;
 
         int horizontalRepeats = 1;
@@ -152,7 +152,7 @@ public class Grid {
 
 
 
-    private boolean checkGridVertical(boolean mouseClick) {
+    private boolean checkGridVertical(int x1, int x2, int y1, int y2, boolean mouseClick) {
         int verticalRepeats = 1;
         int lastNumber;
         int actualNumber;

@@ -76,7 +76,13 @@ public class Cell_JPanel extends JPanel {
                     boolean neighbours = changePosition(false);
 
                     if(neighbours){
-                        if(gridCalculate.checkGrid(true)) {
+                        int x1 = x_clicked.get(x_clicked.size()-1);
+                        int y1 = y_clicked.get(y_clicked.size()-1);
+
+                        int x2 = x_clicked.get(x_clicked.size()-2);
+                        int y2 = y_clicked.get(y_clicked.size()-2);
+
+                        if(gridCalculate.checkGrid(x1, x2, y1, y2, true)) {
                             repaint();
                             pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
@@ -139,7 +145,7 @@ public class Cell_JPanel extends JPanel {
         }
         firstTime = false;
         drawGrid(g);
-        if(gridCalculate.checkGrid(false)) repaint();
+        if(gridCalculate.checkGrid(999, 999, 999, 999, false)) repaint();
     }
 
     private void drawGrid(Graphics g){
