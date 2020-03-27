@@ -5,7 +5,6 @@ import javax.swing.event.ChangeEvent;
 import java.awt.Color;
 
 public class Cell_JFrame extends JFrame {
-
     public Cell_JFrame() {
         setLayout(null);
 
