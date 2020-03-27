@@ -19,6 +19,7 @@ public class Cell_JPanel extends JPanel {
     private int numberOfColors;
     private boolean firstTime = true;
     private JLabel pointLabel;
+    private int elementToRemove;
 
     // saves the clicks of the mouse
     private ArrayList<Integer> x_clicked = new ArrayList<>();
@@ -56,6 +57,18 @@ public class Cell_JPanel extends JPanel {
 
                 // to avoid to run with one click
                 if(x_clicked.size() > 1){
+
+                    if(isFive()) {
+                        gridCalculate.combineFive(elementToRemove);
+
+                        repaint();
+
+                        //empty clicked Arraylist to avoid not wanted clicks
+                        x_clicked.clear();
+                        y_clicked.clear();
+
+                        return;
+                    }
 
                     // if neighbours, than the function changes the position
                     boolean neighbours = changePosition(false);
@@ -245,6 +258,27 @@ public class Cell_JPanel extends JPanel {
 
         }else{
             System.out.println("Not neighbours, no change!");
+            return false;
+        }
+    }
+
+
+    private boolean isFive(){
+        int x1 = x_clicked.get(x_clicked.size()-1);
+        int y1 = y_clicked.get(y_clicked.size()-1);
+
+        int x2 = x_clicked.get(x_clicked.size()-2);
+        int y2 = y_clicked.get(y_clicked.size()-2);
+
+        if(gridCalculate.getSpecialGrid(x1,y1) == 5) {
+            gridCalculate.setSpecialGrid(0, x1,y1);
+            elementToRemove = gridCalculate.getGrid(x2,y2);
+            return true;
+        } else if(gridCalculate.getSpecialGrid(x2, y2) == 5){
+            gridCalculate.setSpecialGrid(0, x2,y2);
+            elementToRemove = gridCalculate.getGrid(x1,y1);
+            return true;
+        } else {
             return false;
         }
     }

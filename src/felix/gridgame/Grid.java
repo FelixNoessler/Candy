@@ -22,6 +22,9 @@ public class Grid {
 
     public int getSpecialGrid(int x, int y){ return this.specialGrid[x][y];}
 
+    public void setSpecialGrid(int element, int x, int y){ this.specialGrid[x][y] = element;}
+
+
     public void setPointsToZero(){
         this.points = 0;
     }
@@ -228,5 +231,24 @@ public class Grid {
         else specialGrid[x][y] = 5;
 
         grid[x][y] = element;
+    }
+
+    public void combineFive(int elementToRemove){
+
+        for(int x_iterator = 0; x_iterator < x_size; x_iterator++){
+            for(int y_iterator = 0; y_iterator < y_size; y_iterator++){
+                int el = grid[x_iterator][y_iterator];
+
+                if(elementToRemove == el){
+                    int yToTop = y_iterator;
+                    while(yToTop > 0){
+                        grid[x_iterator][yToTop] = grid[x_iterator][yToTop-1];
+                        yToTop--;
+                    }
+
+                    grid[x_iterator][0] = r.nextInt(numberOfColors);
+                }
+            }
+        }
     }
 }
