@@ -84,7 +84,10 @@ public class Grid {
                         isFour = true;
                     }
 
-                } else horizontalRepeats = 1;
+                } else {
+                    isFour = false;
+                    horizontalRepeats = 1;
+                }
 
                 if (horizontalRepeats == 3) {
 
