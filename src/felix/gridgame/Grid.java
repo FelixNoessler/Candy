@@ -280,29 +280,36 @@ public class Grid {
         }
     }
 
-    public void combineFour(int rowOrCol, boolean isLine){
-        if(isLine){
+    public void combineFour(int rowOrCol, boolean isLine, boolean isColumn){
+        if(isLine) {
             // remove line
-            for(int i = 0; i < x_size; i++)
-                for(int toTop = rowOrCol; toTop >= 0; toTop--) {
-                    if(toTop != 0) {
+            for (int i = 0; i < x_size; i++)
+                for (int toTop = rowOrCol; toTop >= 0; toTop--) {
+                    if (toTop != 0) {
                         grid[i][toTop] = grid[i][toTop - 1];
-                    }else {
+                    } else {
                         grid[i][toTop] = r.nextInt(numberOfColors);
                     }
                 }
-            }
 
 
-            System.out.println("REmove line");
         } else {
-            // remove column
-            System.out.println("REmove column");
+            System.out.println("REmove line");
         }
 
+        if(isColumn) {
+            // remove column
+            for (int i = 0; i < y_size; i++){
+                grid[i][y_size] = r.nextInt(numberOfColors);
+                }
+
+        } else {
+
+            System.out.println("REmove column");
+        }
+        
         r.nextInt(numberOfColors);
 
     }
-
 
 }
