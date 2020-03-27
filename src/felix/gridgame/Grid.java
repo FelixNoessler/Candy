@@ -8,7 +8,7 @@ public class Grid {
     private int[][] grid;
     private int numberOfColors;
     private int x_size, y_size;
-    private static final Random r = new Random();
+    private Random r = new Random();
 
 
     public Grid(int x_size, int y_size, int numberOfColors){

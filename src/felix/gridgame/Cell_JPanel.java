@@ -14,7 +14,7 @@ public class Cell_JPanel extends JPanel {
 
     Grid gridCalculate;
 
-    private static final Random r = new Random();
+    private Random r = new Random();
     private int x_size, y_size;
     private int numberOfColors;
     private boolean firstTime = true;
