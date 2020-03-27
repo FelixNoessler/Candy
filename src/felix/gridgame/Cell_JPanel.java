@@ -19,6 +19,8 @@ public class Cell_JPanel extends JPanel {
     private int numberOfColors;
     private boolean firstTime = true;
     private JLabel pointLabel;
+
+    //special elements:
     private int elementToRemove;
 
     // saves the clicks of the mouse

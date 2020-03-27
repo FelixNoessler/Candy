@@ -60,6 +60,8 @@ public class Grid {
 
 
     private boolean checkGridHorizontal(boolean mouseClick) {
+        boolean isFour = false;
+
         int horizontalRepeats = 1;
         int lastNumber;
         int actualNumber;
@@ -77,6 +79,11 @@ public class Grid {
 
                 if (actualNumber == lastNumber) {
                     horizontalRepeats++;
+
+                    if(specialGrid[x_iterator][y_iterator] == 4){
+                        isFour = true;
+                    }
+
                 } else horizontalRepeats = 1;
 
                 if (horizontalRepeats == 3) {
