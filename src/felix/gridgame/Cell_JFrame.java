@@ -61,7 +61,6 @@ public class Cell_JFrame extends JFrame {
         this.getContentPane().setBackground(Color.WHITE);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
-
     }
 
     public static void main(String [] args) {
