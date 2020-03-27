@@ -57,7 +57,7 @@ public class Cell_JPanel extends JPanel {
 
                     if(gridCalculate.checkGrid(true)) {
                         repaint();
-                        pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
+                        pointLabel.setText(String.valueOf(gridCalculate.points));
 
                         //empty clicked Arraylist to avoid not wanted clicks
                         x_clicked.clear();

@@ -25,10 +25,6 @@ public class Grid {
         return grid[x][y];
     }
 
-    public int getPoints(){
-        return this.points;
-    }
-
 
     public void generateRandomArray(){
         grid = new int[x_size][y_size];
