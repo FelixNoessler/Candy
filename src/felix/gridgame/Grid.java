@@ -138,6 +138,7 @@ public class Grid {
         return false; // no change!
     }
 
+
     private void removeFromRow(int click1, int click2, int x_start, int x_end, int row) {
         int dif = x_end - x_start;
         int element = grid[x_start+1][row];
@@ -244,6 +245,7 @@ public class Grid {
         }
         return false; // no changes
     }
+
 
     private void removeFromCol(int click1, int click2, int y_start, int y_end, int col) {
         int dif = y_end - y_start;
