@@ -169,7 +169,7 @@ public class Grid {
         int verticalRepeats = 1;
         int lastNumber;
         int actualNumber;
-        int x_col = 0, y_row = 0;
+        int x_col = 0, y_end = 0;
         boolean breakLoop = false;
 
         x_outerloop:
@@ -209,15 +209,13 @@ public class Grid {
                     }
 
                     x_col = x_iterator;
-                    y_row = y_iterator;
+                    y_end = y_iterator;
                     breakLoop = true;
                     break x_outerloop;
                 }
             }
         }
         if(breakLoop) {
-            int y_end = y_row;
-
             if (verticalRepeats > 3) y_end += verticalRepeats - 3;
             int y_start = (y_end - (verticalRepeats - 1));
 
