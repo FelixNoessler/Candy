@@ -118,14 +118,20 @@ public class Grid {
 
             if(mouseClick) points += x_end - x_start + 1;
 
-            removeFromRow(x_start, x_end, y_row);
+            if(!mouseClick) {
+                x1 = x_start+1;
+                x2 = x_start+1;
+            }
+
+            removeFromRow(x1, x2, x_start, x_end, y_row);
+
             return true; // changes!
         }
 
         return false; // no change!
     }
 
-    private void removeFromRow(int x_start, int x_end, int row) {
+    private void removeFromRow(int click1, int click2, int x_start, int x_end, int row) {
         int dif = x_end - x_start;
         int element = grid[x_start+1][row];
 
@@ -139,13 +145,26 @@ public class Grid {
             }
         }
 
+        boolean isClick1 = false;
+
+        for(int i = 0; i <= dif; i ++){
+            if((x_start + i) == click1) {
+                isClick1 = true;
+                break;
+            }
+        }
+
+        int xRemove;
+        if(isClick1) xRemove = click1;
+        else xRemove = click2;
+
         if((dif+1) == 4) {
             System.out.println("Four!!!");
-            setSpecialElement(element, x_start+1, row, true);
+            setSpecialElement(element, xRemove, row, true);
         }
         else if((dif+2) >= 5) {
             System.out.println("Five!!!");
-            setSpecialElement(element, x_start+1, row, false);
+            setSpecialElement(element, xRemove, row, false);
         }
 
     }
@@ -261,9 +280,20 @@ public class Grid {
         }
     }
 
-    public void combineFour(int i, boolean isLine){
+    public void combineFour(int rowOrCol, boolean isLine){
         if(isLine){
             // remove line
+            for(int i = 0; i < x_size; i++)
+                for(int toTop = rowOrCol; toTop >= 0; toTop--) {
+                    if(toTop != 0) {
+                        grid[i][toTop] = grid[i][toTop - 1];
+                    }else {
+                        grid[i][toTop] = r.nextInt(numberOfColors);
+                    }
+                }
+            }
+
+
             System.out.println("REmove line");
         } else {
             // remove column
