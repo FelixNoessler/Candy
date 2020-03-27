@@ -95,10 +95,8 @@ public class Cell_JPanel extends JPanel {
         this.setSize(width_panel, height_panel);
     }
 
-    //for the creation of a new field..............
-    public void setPointsToZero() {
-        gridCalculate.setPointsToZero();
-    }
+    // getter/setter methods ..............
+    public void setPointsToZero() { gridCalculate.setPointsToZero();}
 
     public void setFirstTime(boolean firstTime){
         this.firstTime = firstTime;
@@ -112,11 +110,8 @@ public class Cell_JPanel extends JPanel {
         this.pointLabel.setText(text);
     }
 
-    public void setXYSize(int x, int y){
-        this.x_size = x;
-        this.y_size = y;
-    }
-    // end of creation of a new field...............
+    public void setXYSize(int x, int y){ this.x_size = x; this.y_size = y; }
+    // end of getter/setter methods...............
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -140,10 +135,60 @@ public class Cell_JPanel extends JPanel {
             for (int x = 10; x < x_max; x += 30) {
                 int no;
                 no = gridCalculate.getGrid(x_cell, y_cell);
-                g.setColor(colorArray[no]);
-                g.fillRect( x, y, 25, 25 );
-                g.setColor( Color.GRAY );
-                g.drawRect( x -1, y - 1, 25, 25 );
+
+                if(gridCalculate.getSpecialGrid(x_cell, y_cell) == 4){
+
+                    boolean drawWhite = false;
+                    for(int i = 0; i < 5; i++){
+                        if(drawWhite){
+                            g.setColor(Color.WHITE);
+                            drawWhite = false;
+                        } else {
+                            g.setColor(colorArray[no]);
+                            drawWhite = true;
+                        }
+
+                        g.fillRect( x, y + (i*5), 25, 5);
+                    }
+
+                    g.setColor( Color.GRAY );
+                    g.drawRect( x -1, y - 1, 25, 25 );
+
+                } else if(gridCalculate.getSpecialGrid(x_cell, y_cell) == 5){
+
+                    // draw black or orange color
+                    boolean drawBlack = false;
+
+                    for(int xFive = 0; xFive < 5; xFive++){
+                        for(int yFive = 0; yFive < 5; yFive++){
+                            if(drawBlack) {
+                                g.setColor(Color.BLACK);
+                                drawBlack = false;
+                            }
+                            else {
+                                g.setColor(Color.ORANGE);
+                                drawBlack = true;
+                            }
+
+                            g.fillRect( x + (xFive*5), y + (yFive*5), 5, 5);
+                        }
+                    }
+
+                    // boundaries:
+                    g.setColor( Color.GRAY );
+                    g.drawRect( x -1, y - 1, 25, 25 );
+
+                } else {
+
+                    // fill rectangle
+                    g.setColor(colorArray[no]);
+                    g.fillRect( x, y, 25, 25 );
+
+                    // boundaries of the rectangle
+                    g.setColor( Color.GRAY );
+                    g.drawRect( x -1, y - 1, 25, 25 );
+                }
+
                 x_cell++;
             }
             x_cell = 0;
@@ -153,7 +198,7 @@ public class Cell_JPanel extends JPanel {
 
 
     private void setColors(){
-        colorArray = new Color[numberOfColors];
+        colorArray = new Color[numberOfColors+2];
         for(int i = 0; i < numberOfColors; i++){
 
             float red =   r.nextFloat();
@@ -162,6 +207,11 @@ public class Cell_JPanel extends JPanel {
 
             colorArray[i] = new Color(red, green, blue);
         }
+        // color for four elements
+        colorArray[colorArray.length-2] = new Color(0, 0, 0);
+
+        //color for five elements
+        colorArray[colorArray.length-1] = new Color(255, 255, 255);
     }
 
     private boolean changePosition(boolean back){

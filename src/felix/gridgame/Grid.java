@@ -6,6 +6,7 @@ public class Grid {
 
     private int points = 0;
     private int[][] grid;
+    private int[][] specialGrid;
     private int numberOfColors;
     private int x_size, y_size;
     private Random r = new Random();
@@ -17,9 +18,9 @@ public class Grid {
         this.numberOfColors = numberOfColors;
     }
 
-    public int getPoints(){
-        return this.points;
-    }
+    public int getPoints(){ return this.points; }
+
+    public int getSpecialGrid(int x, int y){ return this.specialGrid[x][y];}
 
     public void setPointsToZero(){
         this.points = 0;
@@ -37,9 +38,13 @@ public class Grid {
     public void generateRandomArray(){
         grid = new int[x_size][y_size];
 
+        // set the special array to 0's
+        specialGrid = new int[x_size][y_size];
+
         for(int x_iterator = 0; x_iterator < x_size; x_iterator++){
             for(int y_iterator = 0; y_iterator < y_size; y_iterator++){
                 grid[x_iterator][y_iterator] = r.nextInt(numberOfColors);
+                specialGrid[x_iterator][y_iterator] = 0;
             }
         }
     }
@@ -110,8 +115,7 @@ public class Grid {
 
     private void removeFromRow(int x_start, int x_end, int row) {
         int dif = x_end - x_start;
-        if((dif+1) == 4) System.out.println("Four!!!");
-        if((dif+1) == 5) System.out.println("Five!!!");
+        int element = grid[x_start+1][row];
 
         for(int y_iterator = row; y_iterator >= 0; y_iterator--){
             for(int x_iterator = x_start; x_iterator <= x_end; x_iterator++){
@@ -123,7 +127,14 @@ public class Grid {
             }
         }
 
-        if((x_end-x_start) >= 5) grid[x_start+1][row] = 0;
+        if((dif+1) == 4) {
+            System.out.println("Four!!!");
+            setSpecialElement(element, x_start+1, row, true);
+        }
+        else if((dif+2) >= 5) {
+            System.out.println("Five!!!");
+            setSpecialElement(element, x_start+1, row, false);
+        }
 
     }
 
@@ -188,18 +199,34 @@ public class Grid {
 
     private void removeFromCol(int y_start, int y_end, int col){
         int dif = y_end - y_start;
-
-        if((dif+1) == 4) System.out.println("Four!!!");
-        if((dif+1) == 5) System.out.println("Five!!!");
+        int element = grid[col][y_start+1];
 
         for(int y_iterator = y_end; y_iterator >= 0; y_iterator--){
             if( (y_iterator-dif) >= 0){
                 grid[col][y_iterator] = grid[col][y_iterator-dif];
             }
             else{
-
                 grid[col][y_iterator] = r.nextInt(numberOfColors);
             }
         }
+
+        if((dif+1) == 4) {
+            System.out.println("Four!!!");
+            setSpecialElement(element, col, y_start+1, true);
+        }
+        else if((dif+2) >= 5) {
+            System.out.println("Five!!!");
+            setSpecialElement(element, col, y_start+1, false);
+        }
+    }
+
+    private void setSpecialElement(int element, int x, int y, boolean isFour){
+        // four Elements in one row/col
+        if(isFour) specialGrid[x][y] = 4;
+
+        // five elements in one row/col
+        else specialGrid[x][y] = 5;
+
+        grid[x][y] = element;
     }
 }
