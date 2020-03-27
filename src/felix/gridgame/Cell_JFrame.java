@@ -1,5 +1,5 @@
 package felix.gridgame;
-//hallo
+//hallo 3
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.Color;
