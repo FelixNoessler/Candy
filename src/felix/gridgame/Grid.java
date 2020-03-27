@@ -2,14 +2,13 @@ package felix.gridgame;
 
 import java.util.Random;
 
-
 public class Grid {
+    public int points = 0;
+
+
     private int[][] grid;
     private int numberOfColors;
     private int x_size, y_size;
-
-    public int points = 0;
-
     private static final Random r = new Random();
 
 
