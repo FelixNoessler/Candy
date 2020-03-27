@@ -283,24 +283,24 @@ public class Grid {
     public void combineFour(int rowOrCol, boolean isLine){
         if(isLine){
             // remove line
-            for(int i = 0; i < x_size; i++)
-                for(int toTop = rowOrCol; toTop >= 0; toTop--) {
-                    if(toTop != 0) {
+            System.out.println("Remove line");
+            for (int i = 0; i < x_size; i++) {
+                for (int toTop = rowOrCol; toTop >= 0; toTop--) {
+                    if (toTop != 0) {
                         grid[i][toTop] = grid[i][toTop - 1];
-                    }else {
+                    } else {
                         grid[i][toTop] = r.nextInt(numberOfColors);
                     }
                 }
             }
-
-
-            System.out.println("REmove line");
         } else {
             // remove column
-            System.out.println("REmove column");
+            System.out.println("Remove column");
+            for (int i = 0; i < y_size; i++) {
+                grid[i][rowOrCol] = r.nextInt(numberOfColors);
+            }
         }
 
-        r.nextInt(numberOfColors);
 
     }
 
