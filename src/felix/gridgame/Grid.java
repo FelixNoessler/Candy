@@ -24,7 +24,6 @@ public class Grid {
 
     public void setSpecialGrid(int element, int x, int y){ this.specialGrid[x][y] = element;}
 
-
     public void setPointsToZero(){
         this.points = 0;
     }
