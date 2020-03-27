@@ -109,6 +109,10 @@ public class Grid {
     }
 
     private void removeFromRow(int x_start, int x_end, int row) {
+        int dif = x_end - x_start;
+        if((dif+1) == 4) System.out.println("Four!!!");
+        if((dif+1) == 5) System.out.println("Five!!!");
+
         for(int y_iterator = row; y_iterator >= 0; y_iterator--){
             for(int x_iterator = x_start; x_iterator <= x_end; x_iterator++){
                 if(y_iterator == 0){
@@ -184,6 +188,10 @@ public class Grid {
 
     private void removeFromCol(int y_start, int y_end, int col){
         int dif = y_end - y_start;
+
+        if((dif+1) == 4) System.out.println("Four!!!");
+        if((dif+1) == 5) System.out.println("Five!!!");
+
         for(int y_iterator = y_end; y_iterator >= 0; y_iterator--){
             if( (y_iterator-dif) >= 0){
                 grid[col][y_iterator] = grid[col][y_iterator-dif];
