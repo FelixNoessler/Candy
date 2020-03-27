@@ -13,7 +13,7 @@ public class Cell_JFrame extends JFrame {
         final int[] y_cells = {15};
         int[] colors = {4};
 
-        Cell_JPanel pan = new Cell_JPanel();
+        Cell_JPanel pan = new Cell_JPanel(x_cells[0], y_cells[0], colors[0]);
         this.add(pan);
 
         // JTextField X_Size
