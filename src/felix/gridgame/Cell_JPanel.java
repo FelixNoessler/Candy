@@ -15,19 +15,16 @@ public class Cell_JPanel extends JPanel {
     Grid gridCalculate;
 
     private static final Random r = new Random();
-
     private int x_size, y_size;
     private int numberOfColors;
-
-    public boolean firstTime = true;
-
-
+    private boolean firstTime = true;
     private JLabel pointLabel;
 
-
+    // saves the clicks of the mouse
     private ArrayList<Integer> x_clicked = new ArrayList<>();
     private ArrayList<Integer> y_clicked = new ArrayList<>();
 
+    // saves the rgb values of the colors in an array
     private Color[] colorArray;
 
     public Cell_JPanel(int x_size, int y_size, int numberOfColors) {
@@ -35,34 +32,43 @@ public class Cell_JPanel extends JPanel {
         this.y_size = y_size;
         this.numberOfColors = numberOfColors;
 
-        this.setBackground(Color.WHITE);
+        // set the layout of the JPanel
         this.setLayout(null);
+        this.setBackground(Color.WHITE);
 
+        // Label for the points (3 fields destroyed = 3 points)
         pointLabel = new JLabel();
         pointLabel.setBounds(x_size*30+20,10,20,30);
         pointLabel.setText("0");
         this.add(pointLabel);
 
+        // MouseListener - looks for the clicks of the mouse
         this.addMouseListener(new MouseListener(){
             @Override
             public void mouseClicked(MouseEvent e) {
                 int getX = (e.getX()-10) / 30;
                 int getY = (e.getY()-10) / 30;
                 System.out.println("("+getX + "," + getY+")");
+
+                // saves the position into the Arraylist
                 x_clicked.add(getX);
                 y_clicked.add(getY);
 
+                // to avoid to run with one click
                 if(x_clicked.size() > 1){
+                    // change position (forward)
                     changePosition(false);
 
                     if(gridCalculate.checkGrid(true)) {
                         repaint();
-                        pointLabel.setText(String.valueOf(gridCalculate.points));
+                        pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
                         //empty clicked Arraylist to avoid not wanted clicks
                         x_clicked.clear();
                         y_clicked.clear();
+
                     } else{
+                        // change back
                         changePosition(true);
                     }
                 }
@@ -82,14 +88,17 @@ public class Cell_JPanel extends JPanel {
         });
 
         this.setDoubleBuffered(true);
-
         int width_panel = x_size*30+40, height_panel = y_size*30+20;
         this.setSize(width_panel, height_panel);
     }
 
     //for the creation of a new field..............
     public void setPointsToZero() {
-        gridCalculate.points = 0;
+        gridCalculate.setPointsToZero();
+    }
+
+    public void setFirstTime(boolean firstTime){
+        this.firstTime = firstTime;
     }
 
     public void setNumberOfColors(int numberOfColors){

@@ -3,8 +3,8 @@ package felix.gridgame;
 import java.util.Random;
 
 public class Grid {
-    public int points = 0;
 
+    private int points = 0;
     private int[][] grid;
     private int numberOfColors;
     private int x_size, y_size;
@@ -15,6 +15,14 @@ public class Grid {
         this.x_size = x_size;
         this.y_size = y_size;
         this.numberOfColors = numberOfColors;
+    }
+
+    public int getPoints(){
+        return this.points;
+    }
+
+    public void setPointsToZero(){
+        this.points = 0;
     }
 
     public void setGrid(int value, int x, int y){
