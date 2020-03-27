@@ -120,17 +120,11 @@ public class Cell_JPanel extends JPanel {
     // getter/setter methods ..............
     public void setPointsToZero() { gridCalculate.setPointsToZero();}
 
-    public void setFirstTime(boolean firstTime){
-        this.firstTime = firstTime;
-    }
+    public void setFirstTime(boolean firstTime){ this.firstTime = firstTime; }
 
-    public void setNumberOfColors(int numberOfColors){
-        this.numberOfColors = numberOfColors;
-    }
+    public void setNumberOfColors(int numberOfColors){ this.numberOfColors = numberOfColors; }
 
-    public void setPointLabel(String text){
-        this.pointLabel.setText(text);
-    }
+    public void setPointLabel(String text){ this.pointLabel.setText(text); }
 
     public void setXYSize(int x, int y){ this.x_size = x; this.y_size = y; }
     // end of getter/setter methods...............

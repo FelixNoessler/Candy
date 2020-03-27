@@ -24,17 +24,11 @@ public class Grid {
 
     public void setSpecialGrid(int element, int x, int y){ this.specialGrid[x][y] = element;}
 
-    public void setPointsToZero(){
-        this.points = 0;
-    }
+    public void setPointsToZero(){ this.points = 0; }
 
-    public void setGrid(int value, int x, int y){
-        grid[x][y] = value;
-    }
+    public void setGrid(int value, int x, int y){ grid[x][y] = value; }
 
-    public int getGrid(int x, int y){
-        return grid[x][y];
-    }
+    public int getGrid(int x, int y){ return grid[x][y]; }
 
 
     public void generateRandomArray(){
