@@ -57,7 +57,8 @@ public class Cell_JPanel extends JPanel {
                 // to avoid to run with one click
                 if(x_clicked.size() > 1){
 
-                    boolean neighbours= changePosition(false);
+                    // if neighbours, than the function changes the position
+                    boolean neighbours = changePosition(false);
 
                     if(neighbours){
                         if(gridCalculate.checkGrid(true)) {
@@ -66,7 +67,7 @@ public class Cell_JPanel extends JPanel {
 
                         } else{
                             // change back
-                            System.out.println("No change!");
+                            System.out.println("No change (changed back)!");
                             changePosition(true);
                         }
                     }
@@ -216,6 +217,7 @@ public class Cell_JPanel extends JPanel {
 
     private boolean changePosition(boolean back){
         int x1, x2, y1, y2;
+
         if(!back){
             x1 = x_clicked.get(x_clicked.size()-1);
             x2 = x_clicked.get(x_clicked.size()-2);
@@ -227,6 +229,7 @@ public class Cell_JPanel extends JPanel {
             y1 = y_clicked.get(y_clicked.size()-2);
             y2 = y_clicked.get(y_clicked.size()-1);
         }
+
 
         //change for neighbours only
         boolean x_change = (x1 == (x2+1) | x1 == (x2-1)) && y1 == y2;
@@ -240,9 +243,10 @@ public class Cell_JPanel extends JPanel {
 
             return true;
 
+        }else{
+            System.out.println("Not neighbours, no change!");
+            return false;
         }
-        System.out.println("Not neighbours!");
-        return false;
     }
 }
 
