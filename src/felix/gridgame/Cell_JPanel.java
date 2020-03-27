@@ -38,9 +38,6 @@ public class Cell_JPanel extends JPanel {
         this.y_size = y_size;
         this.numberOfColors = numberOfColors;
 
-
-        Grid gridCalculate = new Grid(x_size, y_size, numberOfColors);
-
         this.setBackground(Color.WHITE);
         this.setLayout(null);
 
@@ -115,8 +112,9 @@ public class Cell_JPanel extends JPanel {
         super.paintComponent(g);
         if(firstTime) {
             setColors();
-
+            gridCalculate = new Grid(x_size, y_size, numberOfColors);
             gridCalculate.generateRandomArray();
+
         }
         firstTime = false;
         drawGrid(g);
@@ -130,7 +128,8 @@ public class Cell_JPanel extends JPanel {
 
         for (int y = 10; y < y_max; y += 30){
             for (int x = 10; x < x_max; x += 30) {
-                int no = gridCalculate.getGrid(x_cell, y_cell);
+                int no;
+                no = gridCalculate.getGrid(x_cell, y_cell);
                 g.setColor(colorArray[no]);
                 g.fillRect( x, y, 25, 25 );
                 g.setColor( Color.GRAY );

@@ -30,7 +30,6 @@ public class Grid {
 
     public void generateRandomArray(){
         grid = new int[x_size][y_size];
-        System.out.println("Huhuhu");
 
         for(int x_iterator = 0; x_iterator < x_size; x_iterator++){
             for(int y_iterator = 0; y_iterator < y_size; y_iterator++){
@@ -70,13 +69,10 @@ public class Grid {
     }
 
 
-
-
-
-
-    public void checkGrid(boolean mouseClick){
-        checkGridHorizontal(mouseClick);
-        checkGridVertical(mouseClick);
+    public boolean checkGrid(boolean mouseClick){
+        boolean hor = checkGridHorizontal(mouseClick);
+        if(!hor) return false;
+        return checkGridVertical(mouseClick);
     }
 
 
