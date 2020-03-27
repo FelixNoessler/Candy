@@ -12,7 +12,7 @@ public class Cell_JFrame extends JFrame {
         // default values
         final int[] x_cells = {15};
         final int[] y_cells = {15};
-        int[] colors = {5};
+        int[] colors = {4};
 
         // create the JPanel
         Cell_JPanel pan = new Cell_JPanel(x_cells[0], y_cells[0], colors[0]);

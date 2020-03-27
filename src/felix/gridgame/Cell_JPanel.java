@@ -48,7 +48,7 @@ public class Cell_JPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 int getX = (e.getX()-10) / 30;
                 int getY = (e.getY()-10) / 30;
-                System.out.println("("+getX + "," + getY+")");
+                System.out.print("("+getX + "," + getY+") ");
 
                 // saves the position into the Arraylist
                 x_clicked.add(getX);
@@ -56,21 +56,24 @@ public class Cell_JPanel extends JPanel {
 
                 // to avoid to run with one click
                 if(x_clicked.size() > 1){
-                    // change position (forward)
-                    changePosition(false);
 
-                    if(gridCalculate.checkGrid(true)) {
-                        repaint();
-                        pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
+                    boolean neighbours= changePosition(false);
 
-                        //empty clicked Arraylist to avoid not wanted clicks
-                        x_clicked.clear();
-                        y_clicked.clear();
+                    if(neighbours){
+                        if(gridCalculate.checkGrid(true)) {
+                            repaint();
+                            pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
-                    } else{
-                        // change back
-                        changePosition(true);
+                        } else{
+                            // change back
+                            System.out.println("No change!");
+                            changePosition(true);
+                        }
                     }
+
+                    //empty clicked Arraylist to avoid not wanted clicks
+                    x_clicked.clear();
+                    y_clicked.clear();
                 }
             }
 
@@ -87,7 +90,7 @@ public class Cell_JPanel extends JPanel {
             public void mouseExited(MouseEvent e){}
         });
 
-        this.setDoubleBuffered(true);
+        // this.setDoubleBuffered(true); // buffer for painting
         int width_panel = x_size*30+40, height_panel = y_size*30+20;
         this.setSize(width_panel, height_panel);
     }
@@ -161,7 +164,7 @@ public class Cell_JPanel extends JPanel {
         }
     }
 
-    private void changePosition(boolean back){
+    private boolean changePosition(boolean back){
         int x1, x2, y1, y2;
         if(!back){
             x1 = x_clicked.get(x_clicked.size()-1);
@@ -176,15 +179,20 @@ public class Cell_JPanel extends JPanel {
         }
 
         //change for neighbours only
-        if(x1 == x2 | x1 == (x2+1) | x1 == (x2-1)){
-            if(y1 == y2 | y1 == (y2+1) | y1 == (y2-1)) {
-                int save = gridCalculate.getGrid(x1,y1);
+        boolean x_change = (x1 == (x2+1) | x1 == (x2-1)) && y1 == y2;
+        boolean y_change = (y1 == (y2+1) | y1 == (y2-1)) && x1 == x2;
 
-                gridCalculate.setGrid(gridCalculate.getGrid(x2,y2),x1,y1);
-                gridCalculate.setGrid(save,x2,y2);
-            }
+        if(x_change | y_change){
+            int save = gridCalculate.getGrid(x1,y1);
+
+            gridCalculate.setGrid(gridCalculate.getGrid(x2,y2),x1,y1);
+            gridCalculate.setGrid(save,x2,y2);
+
+            return true;
+
         }
-
+        System.out.println("Not neighbours!");
+        return false;
     }
 }
 
