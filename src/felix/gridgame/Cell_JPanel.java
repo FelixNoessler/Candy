@@ -260,6 +260,10 @@ public class Cell_JPanel extends JPanel {
             gridCalculate.setGrid(gridCalculate.getGrid(x2,y2),x1,y1);
             gridCalculate.setGrid(save,x2,y2);
 
+            int saveSpecial = gridCalculate.getSpecialGrid(x1,y1);
+            gridCalculate.setSpecialGrid(gridCalculate.getSpecialGrid(x2,y2),x1,y2);
+            gridCalculate.setSpecialGrid(saveSpecial,x2,y2);
+
             return true;
 
         }else{

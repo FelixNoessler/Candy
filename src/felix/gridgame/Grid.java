@@ -140,10 +140,13 @@ public class Grid {
             for(int xIterator = xStart; xIterator <= xEnd; xIterator++){
                 if(yIterator == 0){
                     grid[xIterator][yIterator] = r.nextInt(numberOfColors);
+                    specialGrid[xIterator][yIterator] = 0;
                 }else {
-                    grid[xIterator][yIterator] = grid[xIterator][yIterator-1];
+                    grid[xIterator][yIterator] = grid[xIterator][yIterator -1];
+                    specialGrid[xIterator][yIterator] = specialGrid[xIterator][yIterator -1];
                 }
             }
+
         }
 
         int xSpecial = whichElementIsMoved(xStart, xEnd, xClick1, xClick2);
@@ -250,8 +253,10 @@ public class Grid {
         for (int y_iterator = yEnd; y_iterator >= 0; y_iterator--) {
             if ((y_iterator - dif) >= 0) {
                 grid[xCol][y_iterator] = grid[xCol][y_iterator - dif];
+                specialGrid[xCol][y_iterator] = specialGrid[xCol][y_iterator - dif];
             } else {
                 grid[xCol][y_iterator] = r.nextInt(numberOfColors);
+                specialGrid[xCol][y_iterator] = 0;
             }
         }
 
@@ -266,6 +271,7 @@ public class Grid {
             setSpecialElement(origColor, xCol, ySpecial, false, false);
         }
     }
+
 
     private int whichElementIsMoved(int start, int end, int test1, int test2) {
         boolean isTest1 = false;
@@ -292,6 +298,7 @@ public class Grid {
         grid[x][y] = origElement;
     }
 
+
     public void combineFive(int elementToRemove){
 
         for(int xIterator = 0; xIterator < grid.length; xIterator++){
@@ -315,6 +322,7 @@ public class Grid {
         }
     }
 
+
     public void combineFour(int rowOrCol, boolean isLine){
         if(isLine){
             // remove line
@@ -335,7 +343,6 @@ public class Grid {
                 grid[i][rowOrCol] = r.nextInt(numberOfColors);
             }
         }
-
     }
 
 
