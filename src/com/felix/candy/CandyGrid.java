@@ -310,6 +310,7 @@ public class CandyGrid {
                 }
 
                 if(elementToRemove == el){
+                    this.points++;
                     int yToTop = yIterator;
                     while(yToTop > 0){
                         grid[xIterator][yToTop] = grid[xIterator][yToTop-1];
@@ -325,7 +326,6 @@ public class CandyGrid {
 
     public void combineFour(int rowOrCol, boolean isLine){
         if(isLine){
-            // remove line
             System.out.println("Remove line");
             for (int i = 0; i < grid.length; i++) {
                 for (int toTop = rowOrCol; toTop >= 0; toTop--) {
@@ -333,13 +333,14 @@ public class CandyGrid {
                         grid[i][toTop] = grid[i][toTop - 1];
                     } else {
                         grid[i][toTop] = r.nextInt(numberOfColors);
+                        this.points++;
                     }
                 }
             }
         } else {
-            // remove column
             System.out.println("Remove column");
             for (int i = 0; i < grid[0].length; i++) {
+                this.points++;
                 grid[i][rowOrCol] = r.nextInt(numberOfColors);
             }
         }

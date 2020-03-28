@@ -12,8 +12,8 @@ public class CandyJFrame extends JFrame {
         setLayout(null);
 
         // default values
-        final int[] x_cells = {13};
-        final int[] y_cells = {13};
+        final int[] x_cells = {12};
+        final int[] y_cells = {10};
         int[] colors = {4};
 
         // create the JPanel
@@ -56,9 +56,11 @@ public class CandyJFrame extends JFrame {
 
         // Options for the JFrame
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setTitle("Cells");
-        int width_frame = x_cells[0] * 30 + 40, height_frame = y_cells[0] * 30 + 100;
-        this.setSize(width_frame, height_frame);
+        setTitle("Candy");
+        int widthFrame = x_cells[0] * 30 + 60;
+        if(widthFrame < 380) widthFrame = 380;
+        int heightFrame = y_cells[0] * 30 + 100;
+        this.setSize(widthFrame, heightFrame);
         this.setVisible(true);
         this.getContentPane().setBackground(Color.WHITE);
         this.setLocationRelativeTo(null);
@@ -68,13 +70,13 @@ public class CandyJFrame extends JFrame {
     public static void main(String [] args) {
 
         // set the look of the gui
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        }
-        catch (UnsupportedLookAndFeelException | ClassNotFoundException |
-                InstantiationException | IllegalAccessException e ) {
-           e.getStackTrace();
-        }
+//        try {
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//        }
+//        catch (UnsupportedLookAndFeelException | ClassNotFoundException |
+//                InstantiationException | IllegalAccessException e ) {
+//           e.getStackTrace();
+//        }
 
         // start the program
         new com.felix.candy.CandyJFrame();

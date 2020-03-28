@@ -41,7 +41,7 @@ public class CandyJPanel extends JPanel {
 
         // Label for the points (3 fields destroyed = 3 points)
         pointLabel = new JLabel();
-        pointLabel.setBounds(x_size*30+20,10,20,30);
+        pointLabel.setBounds(x_size*30+20,10,70,30);
         pointLabel.setText("0");
         this.add(pointLabel);
 
@@ -64,6 +64,7 @@ public class CandyJPanel extends JPanel {
                         gridCalculate.combineFive(elementToRemove);
 
                         repaint();
+                        pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
                         //empty clicked Arraylist to avoid not wanted clicks
                         x_clicked.clear();
@@ -76,18 +77,17 @@ public class CandyJPanel extends JPanel {
                     boolean neighbours = changePosition(false);
 
                     if(neighbours){
-                        int x1 = x_clicked.get(x_clicked.size()-1);
-                        int y1 = y_clicked.get(y_clicked.size()-1);
+                        int xClick1 = x_clicked.get(x_clicked.size()-1);
+                        int yClick1 = y_clicked.get(y_clicked.size()-1);
 
-                        int x2 = x_clicked.get(x_clicked.size()-2);
-                        int y2 = y_clicked.get(y_clicked.size()-2);
+                        int xClick2 = x_clicked.get(x_clicked.size()-2);
+                        int yClick2 = y_clicked.get(y_clicked.size()-2);
 
-                        if(gridCalculate.checkGrid(x1, x2, y1, y2, true)) {
+                        if(gridCalculate.checkGrid(xClick1, xClick2, yClick1, yClick2, true)) {
                             repaint();
                             pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
                         } else{
-                            // change back
                             System.out.println("No change (changed back)!");
                             changePosition(true);
                         }
@@ -113,7 +113,7 @@ public class CandyJPanel extends JPanel {
         });
 
         // this.setDoubleBuffered(true); // buffer for painting
-        int width_panel = x_size*30+40, height_panel = y_size*30+20;
+        int width_panel = x_size*30+60, height_panel = y_size*30+20;
         this.setSize(width_panel, height_panel);
     }
 
