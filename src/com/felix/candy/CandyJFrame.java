@@ -1,4 +1,4 @@
-package felix.gridgame;
+package com.felix.candy;
 //hallo
 
 // Huhu
@@ -6,8 +6,8 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.Color;
 
-public class Cell_JFrame extends JFrame {
-    public Cell_JFrame() {
+public class CandyJFrame extends JFrame {
+    public CandyJFrame() {
         // set the layout options
         setLayout(null);
 
@@ -17,7 +17,7 @@ public class Cell_JFrame extends JFrame {
         int[] colors = {4};
 
         // create the JPanel
-        Cell_JPanel pan = new Cell_JPanel(x_cells[0], y_cells[0], colors[0]);
+        CandyJPanel pan = new CandyJPanel(x_cells[0], y_cells[0], colors[0]);
         this.add(pan);
 
         // JTextField X_Size
@@ -77,6 +77,6 @@ public class Cell_JFrame extends JFrame {
         }
 
         // start the program
-        new Cell_JFrame();
+        new com.felix.candy.CandyJFrame();
     }
 }

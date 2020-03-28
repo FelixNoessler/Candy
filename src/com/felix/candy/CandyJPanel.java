@@ -1,4 +1,4 @@
-package felix.gridgame;
+package com.felix.candy;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -10,9 +10,9 @@ import java.util.Random;
 
 import javax.swing.*;
 
-public class Cell_JPanel extends JPanel {
+public class CandyJPanel extends JPanel {
 
-    Grid gridCalculate;
+    CandyGrid gridCalculate;
 
     private Random r = new Random();
     private int x_size, y_size;
@@ -30,7 +30,7 @@ public class Cell_JPanel extends JPanel {
     // saves the rgb values of the colors in an array
     private Color[] colorArray;
 
-    public Cell_JPanel(int x_size, int y_size, int numberOfColors) {
+    public CandyJPanel(int x_size, int y_size, int numberOfColors) {
         this.x_size = x_size;
         this.y_size = y_size;
         this.numberOfColors = numberOfColors;
@@ -133,7 +133,7 @@ public class Cell_JPanel extends JPanel {
         super.paintComponent(g);
         if(firstTime) {
             setColors();
-            gridCalculate = new Grid(numberOfColors);
+            gridCalculate = new CandyGrid(numberOfColors);
             gridCalculate.generateRandomArray(x_size, y_size);
 
         }

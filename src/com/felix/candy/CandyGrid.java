@@ -1,8 +1,8 @@
-package felix.gridgame;
+package com.felix.candy;
 
 import java.util.Random;
 
-public class Grid {
+public class CandyGrid {
 
     private int points = 0;
     private int[][] grid;
@@ -10,7 +10,7 @@ public class Grid {
     private int numberOfColors;
     private Random r = new Random();
 
-    public Grid(int numberOfColors){
+    public CandyGrid(int numberOfColors){
         this.numberOfColors = numberOfColors;
     }
 
