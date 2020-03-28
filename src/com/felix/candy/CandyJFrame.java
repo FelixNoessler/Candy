@@ -1,7 +1,5 @@
 package com.felix.candy;
-//hallo
 
-// Huhu
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.Color;
