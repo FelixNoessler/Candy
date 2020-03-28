@@ -16,27 +16,27 @@ public class CandyGrid {
 
     public int getPoints(){ return this.points; }
 
-    public int getSpecialGrid(int x, int y){ return this.specialGrid[x][y];}
+    public int getSpecialGrid(int y, int x){ return this.specialGrid[y][x];}
 
-    public void setSpecialGrid(int element, int x, int y){ this.specialGrid[x][y] = element;}
+    public void setSpecialGrid(int element, int y, int x){ this.specialGrid[y][x] = element;}
 
     public void setPointsToZero(){ this.points = 0; }
 
-    public void setGrid(int value, int x, int y){ grid[x][y] = value; }
+    public void setGrid(int value, int y, int x){ grid[y][x] = value; }
 
-    public int getGrid(int x, int y){ return grid[x][y]; }
+    public int getGrid(int y, int x){ return grid[y][x]; }
 
 
-    public void generateRandomArray(int x_size, int y_size){
-        grid = new int[x_size][y_size];
-        specialGrid = new int[x_size][y_size];
+    public void generateRandomArray(int ySize, int xSize){
+        grid = new int[ySize][xSize];
+        specialGrid = new int[ySize][xSize];
 
-        for(int xIterator = 0; xIterator < x_size; xIterator++){
-            for(int yIterator = 0; yIterator < y_size; yIterator++){
-                grid[xIterator][yIterator] = r.nextInt(numberOfColors);
+        for(int yIterator = 0; yIterator < ySize; yIterator++){
+            for(int xIterator = 0; xIterator < xSize; xIterator++){
+                grid[yIterator][xIterator] = r.nextInt(numberOfColors);
 
                 // set the special array to 0's
-                specialGrid[xIterator][yIterator] = 0;
+                specialGrid[yIterator][xIterator] = 0;
             }
         }
     }
@@ -119,7 +119,7 @@ public class CandyGrid {
             }
 
             if (isFour) {
-                combineFour(yRow, fourLine);
+                combineFour(yRow, fourLine, grid[xStart][yRow]);
                 specialGrid[fourXPosition][yRow] = 0;
             } else {
                 removeFromRow(xClick1, xClick2, xStart, xEnd, yRow);
@@ -234,7 +234,8 @@ public class CandyGrid {
             }
 
             if (isFour) {
-                combineFour(xCol, fourLine);
+                int origElement = grid[xCol][yStart];
+                combineFour(xCol, fourLine, origElement);
                 specialGrid[xCol][fourYPosition] = 0;
 
             } else removeFromCol(yClick1, yClick2, yStart, yEnd, xCol);
@@ -324,25 +325,42 @@ public class CandyGrid {
     }
 
 
-    public void combineFour(int rowOrCol, boolean isLine){
+    public void combineFour(int rowOrCol, boolean isLine, int origColor){
         if(isLine){
             System.out.println("Remove line");
-            for (int i = 0; i < grid.length; i++) {
+            for (int xIterator = 0; xIterator < grid.length; xIterator++) {
                 for (int toTop = rowOrCol; toTop >= 0; toTop--) {
+                    runFourFive(origColor, xIterator, toTop);
+
                     if (toTop != 0) {
-                        grid[i][toTop] = grid[i][toTop - 1];
+                        grid[xIterator][toTop] = grid[xIterator][toTop - 1];
                     } else {
-                        grid[i][toTop] = r.nextInt(numberOfColors);
+                        grid[xIterator][toTop] = r.nextInt(numberOfColors);
                         this.points++;
                     }
                 }
             }
         } else {
             System.out.println("Remove column");
-            for (int i = 0; i < grid[0].length; i++) {
+            for (int yIterator = 0; yIterator < grid[1].length; yIterator++) {
                 this.points++;
-                grid[i][rowOrCol] = r.nextInt(numberOfColors);
+                grid[rowOrCol][yIterator] = r.nextInt(numberOfColors);
+
+                runFourFive(origColor, rowOrCol, yIterator);
             }
+        }
+    }
+
+    private void runFourFive(int origColor, int i, int toTop) {
+        if(specialGrid[i][toTop] == 3){
+            specialGrid[i][toTop] = 0;
+            combineFour(i, false, origColor);
+        } else if(specialGrid[i][toTop] == 4){
+            specialGrid[i][toTop] = 0;
+            combineFour(toTop, true, origColor);
+        }else if(specialGrid[i][toTop] == 5){
+            specialGrid[i][toTop] = 0;
+            combineFive(origColor);
         }
     }
 

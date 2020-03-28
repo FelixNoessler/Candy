@@ -15,7 +15,7 @@ public class CandyJPanel extends JPanel {
     CandyGrid gridCalculate;
 
     private Random r = new Random();
-    private int x_size, y_size;
+    private int xSize, ySize;
     private int numberOfColors;
     private boolean firstTime = true;
     private JLabel pointLabel;
@@ -30,9 +30,10 @@ public class CandyJPanel extends JPanel {
     // saves the rgb values of the colors in an array
     private Color[] colorArray;
 
-    public CandyJPanel(int x_size, int y_size, int numberOfColors) {
-        this.x_size = x_size;
-        this.y_size = y_size;
+    public CandyJPanel(int ySize, int xSize, int numberOfColors) {
+        this.ySize = ySize;
+        this.xSize = xSize;
+
         this.numberOfColors = numberOfColors;
 
         // set the layout of the JPanel
@@ -41,7 +42,7 @@ public class CandyJPanel extends JPanel {
 
         // Label for the points (3 fields destroyed = 3 points)
         pointLabel = new JLabel();
-        pointLabel.setBounds(x_size*30+20,10,70,30);
+        pointLabel.setBounds(xSize *30+20,10,70,30);
         pointLabel.setText("0");
         this.add(pointLabel);
 
@@ -113,7 +114,7 @@ public class CandyJPanel extends JPanel {
         });
 
         // this.setDoubleBuffered(true); // buffer for painting
-        int width_panel = x_size*30+60, height_panel = y_size*30+20;
+        int width_panel = xSize *30+60, height_panel = ySize *30+20;
         this.setSize(width_panel, height_panel);
     }
 
@@ -126,7 +127,7 @@ public class CandyJPanel extends JPanel {
 
     public void setPointLabel(String text){ this.pointLabel.setText(text); }
 
-    public void setXYSize(int x, int y){ this.x_size = x; this.y_size = y; }
+    public void setXYSize(int x, int y){ this.xSize = x; this.ySize = y; }
     // end of getter/setter methods...............
 
     protected void paintComponent(Graphics g) {
@@ -134,7 +135,7 @@ public class CandyJPanel extends JPanel {
         if(firstTime) {
             setColors();
             gridCalculate = new CandyGrid(numberOfColors);
-            gridCalculate.generateRandomArray(x_size, y_size);
+            gridCalculate.generateRandomArray(ySize, xSize);
 
         }
         firstTime = false;
@@ -145,7 +146,7 @@ public class CandyJPanel extends JPanel {
     private void drawGrid(Graphics g){
         int x_cell = 0, y_cell = 0;
 
-        int x_max = 30*x_size +10, y_max = 30*y_size +10;
+        int x_max = 30* xSize +10, y_max = 30* ySize +10;
 
         for (int y = 10; y < y_max; y += 30){
             for (int x = 10; x < x_max; x += 30) {
