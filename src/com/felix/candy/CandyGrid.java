@@ -1,5 +1,9 @@
 package com.felix.candy;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
 
 public class CandyGrid {
@@ -9,9 +13,24 @@ public class CandyGrid {
     private int[][] specialGrid;
     private int numberOfColors;
     private Random r = new Random();
+    private javax.swing.Timer t;
+
+
 
     public CandyGrid(int numberOfColors){
         this.numberOfColors = numberOfColors;
+
+
+
+
+
+//        t = new javax.swing.Timer(2000, new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                System.out.println("Huch");
+//            }
+//        });
+//
+//        t.setRepeats(false);
     }
 
     public int getPoints(){ return this.points; }
@@ -33,10 +52,12 @@ public class CandyGrid {
 
         for(int yIterator = 0; yIterator < grid.length; yIterator++){
             for(int xIterator = 0; xIterator < grid[yIterator].length; xIterator++){
+                //t.start();
                 grid[yIterator][xIterator] = r.nextInt(numberOfColors);
-
+                //super.repaint();
                 // set the special array to 0's
                 specialGrid[yIterator][xIterator] = 0;
+                //t.stop();
             }
         }
     }
@@ -60,8 +81,7 @@ public class CandyGrid {
         int xEnd = 0, yRow = 0;
         boolean breakLoop = false;
 
-        y_outerloop:
-
+        outerLoop:
         for (int yIterator = 0; yIterator < grid.length; yIterator++) {
             for (int xIterator = 0; xIterator < grid[yIterator].length; xIterator++) {
 
@@ -103,7 +123,7 @@ public class CandyGrid {
                     yRow = yIterator;
                     xEnd = xIterator;
                     breakLoop = true;
-                    break y_outerloop;
+                    break outerLoop;
                 }
             }
         }

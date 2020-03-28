@@ -1,7 +1,6 @@
 package com.felix.candy;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -31,19 +30,17 @@ public class CandyJPanel extends JPanel {
     private Color[] colorArray;
 
     public CandyJPanel(int ySize, int xSize, int numberOfColors) {
+        super();
         this.ySize = ySize;
         this.xSize = xSize;
+        this.setDoubleBuffered(true);
 
         this.numberOfColors = numberOfColors;
 
-        // set the layout of the JPanel
-        this.setLayout(null);
-        this.setBackground(Color.WHITE);
 
         // Label for the points (3 fields destroyed = 3 points)
-        pointLabel = new JLabel();
-        pointLabel.setBounds(xSize *30+20,10,70,30);
-        pointLabel.setText("0");
+        pointLabel = new JLabel("0");
+       // pointLabel.setBounds(xSize *30+20,1000,70,30);
         this.add(pointLabel);
 
         // MouseListener - looks for the clicks of the mouse
@@ -65,7 +62,10 @@ public class CandyJPanel extends JPanel {
                         gridCalculate.combineFive(elementToRemove);
 
                         repaint();
-                        pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
+                        //super.setText(String.valueOf(gridCalculate.getPoints()));
+                        //super.
+
+                        super.setPointLabel1("asd");
 
                         //empty clicked Arraylist to avoid not wanted clicks
                         xClicked.clear();
@@ -113,10 +113,12 @@ public class CandyJPanel extends JPanel {
             public void mouseExited(MouseEvent e){}
         });
 
-        // this.setDoubleBuffered(true); // buffer for painting
-        int width_panel = xSize *30+60, height_panel = ySize *30+20;
-        this.setSize(width_panel, height_panel);
+
+        int widthPanel = xSize *30+60, heightPanel = ySize *30+20;
+        this.setPreferredSize(new Dimension(widthPanel,heightPanel));
     }
+
+    public CandyJPanel(){}
 
     // getter/setter methods ..............
     public void setPointsToZero() { gridCalculate.setPointsToZero();}
