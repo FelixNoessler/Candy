@@ -29,7 +29,6 @@ public class Grid {
 
     public void generateRandomArray(int x_size, int y_size){
         grid = new int[x_size][y_size];
-
         // set the special array to 0's
         specialGrid = new int[x_size][y_size];
 
@@ -77,8 +76,8 @@ public class Grid {
                         isFour = true;
                         fourPosition = x_iterator;
 
-                        if(special == 3) fourLine = false;
-                        else fourLine = true;
+                        // sets it true for 4
+                        fourLine = special != 3;
                     }
 
                 } else {
@@ -190,8 +189,7 @@ public class Grid {
                         isFour = true;
                         fourPosition = y_iterator;
 
-                        if(special == 3) fourLine = false;
-                        else fourLine = true;
+                        fourLine = special != 3;
                     }
 
                 } else {
