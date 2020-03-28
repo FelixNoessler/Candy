@@ -133,8 +133,8 @@ public class Cell_JPanel extends JPanel {
         super.paintComponent(g);
         if(firstTime) {
             setColors();
-            gridCalculate = new Grid(x_size, y_size, numberOfColors);
-            gridCalculate.generateRandomArray();
+            gridCalculate = new Grid(numberOfColors);
+            gridCalculate.generateRandomArray(x_size, y_size);
 
         }
         firstTime = false;
@@ -151,9 +151,10 @@ public class Cell_JPanel extends JPanel {
             for (int x = 10; x < x_max; x += 30) {
                 int no;
                 no = gridCalculate.getGrid(x_cell, y_cell);
+                int special = gridCalculate.getSpecialGrid(x_cell, y_cell);
 
-                if(gridCalculate.getSpecialGrid(x_cell, y_cell) == 4){
-
+                if(special == 4 | special == 3){
+                    // four in one row
                     boolean drawWhite = false;
                     for(int i = 0; i < 5; i++){
                         if(drawWhite){
@@ -163,15 +164,18 @@ public class Cell_JPanel extends JPanel {
                             g.setColor(colorArray[no]);
                             drawWhite = true;
                         }
+                        if(special == 4){
+                            g.fillRect( x , y + (i*5), 25, 5);
+                        }else{
+                            g.fillRect( x + (i*5), y , 5, 25);
+                        }
 
-                        g.fillRect( x, y + (i*5), 25, 5);
                     }
 
                     g.setColor( Color.GRAY );
                     g.drawRect( x -1, y - 1, 25, 25 );
 
-                } else if(gridCalculate.getSpecialGrid(x_cell, y_cell) == 5){
-
+                } else if(special == 5){
                     // draw black or orange color
                     boolean drawBlack = false;
 
