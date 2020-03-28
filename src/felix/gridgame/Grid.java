@@ -29,101 +29,100 @@ public class Grid {
 
     public void generateRandomArray(int x_size, int y_size){
         grid = new int[x_size][y_size];
-        // set the special array to 0's
         specialGrid = new int[x_size][y_size];
 
-        for(int x_iterator = 0; x_iterator < x_size; x_iterator++){
-            for(int y_iterator = 0; y_iterator < y_size; y_iterator++){
-                grid[x_iterator][y_iterator] = r.nextInt(numberOfColors);
-                specialGrid[x_iterator][y_iterator] = 0;
+        for(int xIterator = 0; xIterator < x_size; xIterator++){
+            for(int yIterator = 0; yIterator < y_size; yIterator++){
+                grid[xIterator][yIterator] = r.nextInt(numberOfColors);
+
+                // set the special array to 0's
+                specialGrid[xIterator][yIterator] = 0;
             }
         }
     }
 
 
-    public boolean checkGrid(int x1, int x2, int y1, int y2, boolean mouseClick){
+    public boolean checkGrid(int xClick1, int xClick2, int yClick1, int yClick2, boolean mouseClick){
         // true = changes!, false = no changes
-        if(checkGridHorizontal(x1, x2, mouseClick)) return true;
-        return checkGridVertical(y1, y2, mouseClick);
+        if(checkGridHorizontal(xClick1, xClick2, mouseClick)) return true;
+        return checkGridVertical(yClick1, yClick2, mouseClick);
     }
 
 
     private boolean checkGridHorizontal(int xClick1, int xClick2, boolean mouseClick) {
         boolean isFour = false;
         boolean fourLine = false;
-        int fourPosition = 0;
+        int fourXPosition = 0;
 
         int horizontalRepeats = 1;
         int lastNumber;
         int actualNumber;
-        int x_col = 0, y_row = 0;
+        int xEnd = 0, yRow = 0;
         boolean breakLoop = false;
 
         y_outerloop:
-        for (int y_iterator = 0; y_iterator < grid[0].length; y_iterator++) {
-            for (int x_iterator = 0; x_iterator < grid.length; x_iterator++) {
+        for (int yIterator = 0; yIterator < grid[0].length; yIterator++) {
+            for (int xIterator = 0; xIterator < grid.length; xIterator++) {
 
-                actualNumber = grid[x_iterator][y_iterator];
+                actualNumber = grid[xIterator][yIterator];
 
-                if (x_iterator - 1 < 0) lastNumber = 999;
-                else lastNumber = grid[x_iterator - 1][y_iterator];
+                if (xIterator - 1 < 0) lastNumber = 999;
+                else lastNumber = grid[xIterator - 1][yIterator];
 
-                if (actualNumber == lastNumber) {
-                    horizontalRepeats++;
-
-                    int special = specialGrid[x_iterator][y_iterator];
-                    if(special == 4 | special == 3){
-                        isFour = true;
-                        fourPosition = x_iterator;
-
-                        // sets it true for 4
-                        fourLine = special != 3;
-                    }
-
-                } else {
+                if (actualNumber != lastNumber){
                     horizontalRepeats = 1;
                     isFour = false;
+
+                } else  {
+                    horizontalRepeats++;
+
+                    int special = specialGrid[xIterator][yIterator];
+                    if(special == 4 | special == 3){
+                        isFour = true;
+                        fourXPosition = xIterator;
+
+                        // sets it true for 4, false for 3
+                        fourLine = special != 3;
+                    }
                 }
-
-                if (horizontalRepeats == 3) {
-
+                if(horizontalRepeats == 3) {
                     //check for more of the same color in the row:
                     int i = 1;
                     while (true) {
                         //checks that we are in the grid
-                        if ((x_iterator + i) > (grid.length - 1)) break;
+                        if ((xIterator + i) > (grid.length - 1)) break;
 
-                        int nextNumber = grid[x_iterator + i][y_iterator];
+                        int nextNumber = grid[xIterator + i][yIterator];
 
                         if (nextNumber == actualNumber) horizontalRepeats++;
                         else break;
                         i++;
                     }
 
-                    x_col = x_iterator;
-                    y_row = y_iterator;
+                    xEnd = xIterator;
+                    yRow = yIterator;
                     breakLoop = true;
                     break y_outerloop;
                 }
             }
         }
         if(breakLoop) {
-            int x_end = x_col;
-            if (horizontalRepeats > 3) x_end += horizontalRepeats - 3;
-            int x_start = (x_end - (horizontalRepeats - 1));
+            if (horizontalRepeats > 3) xEnd += horizontalRepeats - 3;
+            int xStart = (xEnd - (horizontalRepeats - 1));
 
-            if (mouseClick) points += x_end - x_start + 1;
-
-            if (!mouseClick) {
-                xClick1 = x_start + 1;
-                xClick2 = x_start + 1;
+            if (mouseClick) {
+                points += xEnd - xStart + 1;
+            }
+            else {
+                xClick1 = xStart + 1;
+                xClick2 = xStart + 1;
             }
 
             if (isFour) {
-                combineFour(y_row, fourLine);
-                specialGrid[fourPosition][y_row] = 0;
+                combineFour(yRow, fourLine);
+                specialGrid[fourXPosition][yRow] = 0;
             } else {
-                removeFromRow(xClick1, xClick2, x_start, x_end, y_row);
+                removeFromRow(xClick1, xClick2, xStart, xEnd, yRow);
             }
 
             return true; // changes!
@@ -133,30 +132,30 @@ public class Grid {
     }
 
 
-    private void removeFromRow(int xClick1, int xClick2, int x_start, int x_end, int row) {
-        int dif = x_end - x_start;
-        int element = grid[x_start+1][row];
+    private void removeFromRow(int xClick1, int xClick2, int xStart, int xEnd, int yRow) {
+        int dif = xEnd - xStart;
+        int origColor = grid[xStart+1][yRow];
 
-        for(int y_iterator = row; y_iterator >= 0; y_iterator--){
-            for(int x_iterator = x_start; x_iterator <= x_end; x_iterator++){
-                if(y_iterator == 0){
-                    grid[x_iterator][y_iterator] = r.nextInt(numberOfColors);
+        for(int yIterator = yRow; yIterator >= 0; yIterator--){
+            for(int xIterator = xStart; xIterator <= xEnd; xIterator++){
+                if(yIterator == 0){
+                    grid[xIterator][yIterator] = r.nextInt(numberOfColors);
                 }else {
-                    grid[x_iterator][y_iterator] = grid[x_iterator][y_iterator-1];
+                    grid[xIterator][yIterator] = grid[xIterator][yIterator-1];
                 }
             }
         }
 
-        int xRemove = whichElementIsMoved(x_start, x_end, xClick1, xClick2);
+        int xSpecial = whichElementIsMoved(xStart, xEnd, xClick1, xClick2);
 
 
         if((dif+1) == 4) {
             System.out.println("Four!!!");
-            setSpecialElement(element, xRemove, row, true, true);
+            setSpecialElement(origColor, xSpecial, yRow, true, true);
         }
         else if((dif+2) >= 5) {
             System.out.println("Five!!!");
-            setSpecialElement(element, xRemove, row, false, true);
+            setSpecialElement(origColor, xSpecial, yRow, false, true);
         }
 
     }
@@ -165,29 +164,29 @@ public class Grid {
     private boolean checkGridVertical(int yClick1, int yClick2, boolean mouseClick) {
         boolean isFour = false;
         boolean fourLine = true;
-        int fourPosition = 0;
+        int fourYPosition = 0;
 
         int verticalRepeats = 1;
         int lastNumber;
         int actualNumber;
-        int x_col = 0, y_end = 0;
+        int xCol = 0, yEnd = 0;
         boolean breakLoop = false;
 
         x_outerloop:
-        for (int x_iterator = 0; x_iterator < grid.length; x_iterator++) {
-            for (int y_iterator = 0; y_iterator < grid[0].length; y_iterator++) {
-                actualNumber = grid[x_iterator][y_iterator];
+        for (int xIterator = 0; xIterator < grid.length; xIterator++) {
+            for (int yIterator = 0; yIterator < grid[0].length; yIterator++) {
+                actualNumber = grid[xIterator][yIterator];
 
-                if (y_iterator - 1 < 0) lastNumber = 999;
-                else lastNumber = grid[x_iterator][y_iterator-1];
+                if (yIterator - 1 < 0) lastNumber = 999;
+                else lastNumber = grid[xIterator][yIterator-1];
 
                 if (actualNumber == lastNumber) {
                     verticalRepeats++;
 
-                    int special = specialGrid[x_iterator][y_iterator];
+                    int special = specialGrid[xIterator][yIterator];
                     if (special == 4 | special == 3) {
                         isFour = true;
-                        fourPosition = y_iterator;
+                        fourYPosition = yIterator;
 
                         fourLine = special != 3;
                     }
@@ -204,38 +203,38 @@ public class Grid {
 
                     while (true) {
                         //checks that we are in the grid
-                        if ((y_iterator + i) > (grid[0].length - 1)) break;
+                        if ((yIterator + i) > (grid[0].length - 1)) break;
 
-                        int nextNumber = grid[x_iterator][y_iterator+1];
+                        int nextNumber = grid[xIterator][yIterator+1];
 
                         if (nextNumber == actualNumber) verticalRepeats++;
                         else break;
                         i++;
                     }
 
-                    x_col = x_iterator;
-                    y_end = y_iterator;
+                    xCol = xIterator;
+                    yEnd = yIterator;
                     breakLoop = true;
                     break x_outerloop;
                 }
             }
         }
         if(breakLoop) {
-            if (verticalRepeats > 3) y_end += verticalRepeats - 3;
-            int y_start = (y_end - (verticalRepeats - 1));
+            if (verticalRepeats > 3) yEnd += verticalRepeats - 3;
+            int yStart = (yEnd - (verticalRepeats - 1));
 
-            if (mouseClick) points += y_end - y_start + 1;
+            if (mouseClick) points += yEnd - yStart + 1;
 
             if (!mouseClick) {
-                yClick1 = y_start + 1;
-                yClick2 = y_start + 1;
+                yClick1 = yStart + 1;
+                yClick2 = yStart + 1;
             }
 
             if (isFour) {
-                combineFour(x_col, fourLine);
-                specialGrid[x_col][fourPosition] = 0;
+                combineFour(xCol, fourLine);
+                specialGrid[xCol][fourYPosition] = 0;
 
-            } else removeFromCol(yClick1, yClick2, y_start, y_end, x_col);
+            } else removeFromCol(yClick1, yClick2, yStart, yEnd, xCol);
 
 
             return true; // changes!
@@ -244,27 +243,27 @@ public class Grid {
     }
 
 
-    private void removeFromCol(int yClick1, int yClick2, int y_start, int y_end, int col) {
-        int dif = y_end - y_start;
-        int element = grid[col][y_start + 1];
+    private void removeFromCol(int yClick1, int yClick2, int yStart, int yEnd, int xCol) {
+        int dif = yEnd - yStart;
+        int origColor = grid[xCol][yStart];
 
-        for (int y_iterator = y_end; y_iterator >= 0; y_iterator--) {
+        for (int y_iterator = yEnd; y_iterator >= 0; y_iterator--) {
             if ((y_iterator - dif) >= 0) {
-                grid[col][y_iterator] = grid[col][y_iterator - dif];
+                grid[xCol][y_iterator] = grid[xCol][y_iterator - dif];
             } else {
-                grid[col][y_iterator] = r.nextInt(numberOfColors);
+                grid[xCol][y_iterator] = r.nextInt(numberOfColors);
             }
         }
 
 
-        int yRemove = whichElementIsMoved(y_start, y_end, yClick1, yClick2);
+        int ySpecial = whichElementIsMoved(yStart, yEnd, yClick1, yClick2);
 
         if ((dif + 1) == 4) {
             System.out.println("Four!!!");
-            setSpecialElement(element, col, yRemove, true, false);
+            setSpecialElement(origColor, xCol, ySpecial, true, false);
         } else if ((dif + 2) >= 5) {
             System.out.println("Five!!!");
-            setSpecialElement(element, col, yRemove, false, false);
+            setSpecialElement(origColor, xCol, ySpecial, false, false);
         }
     }
 
@@ -295,22 +294,22 @@ public class Grid {
 
     public void combineFive(int elementToRemove){
 
-        for(int x_iterator = 0; x_iterator < grid.length; x_iterator++){
-            for(int y_iterator = 0; y_iterator < grid[0].length; y_iterator++){
-                int el = grid[x_iterator][y_iterator];
+        for(int xIterator = 0; xIterator < grid.length; xIterator++){
+            for(int yIterator = 0; yIterator < grid[0].length; yIterator++){
+                int el = grid[xIterator][yIterator];
 
-                if(specialGrid[x_iterator][y_iterator] == 5){
-                    specialGrid[x_iterator][y_iterator] = 0;
+                if(specialGrid[xIterator][yIterator] == 5){
+                    specialGrid[xIterator][yIterator] = 0;
                 }
 
                 if(elementToRemove == el){
-                    int yToTop = y_iterator;
+                    int yToTop = yIterator;
                     while(yToTop > 0){
-                        grid[x_iterator][yToTop] = grid[x_iterator][yToTop-1];
+                        grid[xIterator][yToTop] = grid[xIterator][yToTop-1];
                         yToTop--;
                     }
 
-                    grid[x_iterator][0] = r.nextInt(numberOfColors);
+                    grid[xIterator][0] = r.nextInt(numberOfColors);
                 }
             }
         }
