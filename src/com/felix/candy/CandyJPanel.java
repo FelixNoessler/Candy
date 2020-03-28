@@ -24,8 +24,8 @@ public class CandyJPanel extends JPanel {
     private int elementToRemove;
 
     // saves the clicks of the mouse
-    private ArrayList<Integer> x_clicked = new ArrayList<>();
-    private ArrayList<Integer> y_clicked = new ArrayList<>();
+    private ArrayList<Integer> xClicked = new ArrayList<>();
+    private ArrayList<Integer> yClicked = new ArrayList<>();
 
     // saves the rgb values of the colors in an array
     private Color[] colorArray;
@@ -55,11 +55,11 @@ public class CandyJPanel extends JPanel {
                 System.out.print("("+getX + "," + getY+") ");
 
                 // saves the position into the Arraylist
-                x_clicked.add(getX);
-                y_clicked.add(getY);
+                xClicked.add(getX);
+                yClicked.add(getY);
 
                 // to avoid to run with one click
-                if(x_clicked.size() > 1){
+                if(xClicked.size() > 1){
 
                     if(isFive()) {
                         gridCalculate.combineFive(elementToRemove);
@@ -68,8 +68,8 @@ public class CandyJPanel extends JPanel {
                         pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
                         //empty clicked Arraylist to avoid not wanted clicks
-                        x_clicked.clear();
-                        y_clicked.clear();
+                        xClicked.clear();
+                        yClicked.clear();
 
                         return;
                     }
@@ -78,11 +78,11 @@ public class CandyJPanel extends JPanel {
                     boolean neighbours = changePosition(false);
 
                     if(neighbours){
-                        int xClick1 = x_clicked.get(x_clicked.size()-1);
-                        int yClick1 = y_clicked.get(y_clicked.size()-1);
+                        int xClick1 = xClicked.get(xClicked.size()-1);
+                        int yClick1 = yClicked.get(yClicked.size()-1);
 
-                        int xClick2 = x_clicked.get(x_clicked.size()-2);
-                        int yClick2 = y_clicked.get(y_clicked.size()-2);
+                        int xClick2 = xClicked.get(xClicked.size()-2);
+                        int yClick2 = yClicked.get(yClicked.size()-2);
 
                         if(gridCalculate.checkGrid(xClick1, xClick2, yClick1, yClick2, true)) {
                             repaint();
@@ -95,8 +95,8 @@ public class CandyJPanel extends JPanel {
                     }
 
                     //empty clicked Arraylist to avoid not wanted clicks
-                    x_clicked.clear();
-                    y_clicked.clear();
+                    xClicked.clear();
+                    yClicked.clear();
                 }
             }
 
@@ -144,15 +144,16 @@ public class CandyJPanel extends JPanel {
     }
 
     private void drawGrid(Graphics g){
-        int x_cell = 0, y_cell = 0;
+        int xCell = 0, yCell = 0;
 
-        int x_max = 30* xSize +10, y_max = 30* ySize +10;
+        int yMax = 30* ySize +10;
+        int xMax = 30* xSize +10;
 
-        for (int y = 10; y < y_max; y += 30){
-            for (int x = 10; x < x_max; x += 30) {
+        for (int y = 10; y < yMax; y += 30){
+            for (int x = 10; x < xMax; x += 30) {
                 int no;
-                no = gridCalculate.getGrid(x_cell, y_cell);
-                int special = gridCalculate.getSpecialGrid(x_cell, y_cell);
+                no = gridCalculate.getGrid(yCell, xCell);
+                int special = gridCalculate.getSpecialGrid(yCell, xCell);
 
                 if(special == 4 | special == 3){
                     // four in one row
@@ -210,10 +211,10 @@ public class CandyJPanel extends JPanel {
                     g.drawRect( x -1, y - 1, 25, 25 );
                 }
 
-                x_cell++;
+                xCell++;
             }
-            x_cell = 0;
-            y_cell++;
+            xCell = 0;
+            yCell++;
         }
     }
 
@@ -239,31 +240,31 @@ public class CandyJPanel extends JPanel {
         int x1, x2, y1, y2;
 
         if(!back){
-            x1 = x_clicked.get(x_clicked.size()-1);
-            x2 = x_clicked.get(x_clicked.size()-2);
-            y1 = y_clicked.get(y_clicked.size()-1);
-            y2 = y_clicked.get(y_clicked.size()-2);
+            y1 = yClicked.get(yClicked.size()-1);
+            y2 = yClicked.get(yClicked.size()-2);
+            x1 = xClicked.get(xClicked.size()-1);
+            x2 = xClicked.get(xClicked.size()-2);
         }else{
-            x1 = x_clicked.get(x_clicked.size()-2);
-            x2 = x_clicked.get(x_clicked.size()-1);
-            y1 = y_clicked.get(y_clicked.size()-2);
-            y2 = y_clicked.get(y_clicked.size()-1);
+            y1 = yClicked.get(yClicked.size()-2);
+            y2 = yClicked.get(yClicked.size()-1);
+            x1 = xClicked.get(xClicked.size()-2);
+            x2 = xClicked.get(xClicked.size()-1);
         }
 
 
         //change for neighbours only
-        boolean x_change = (x1 == (x2+1) | x1 == (x2-1)) && y1 == y2;
-        boolean y_change = (y1 == (y2+1) | y1 == (y2-1)) && x1 == x2;
+        boolean xChange = (x1 == (x2+1) | x1 == (x2-1)) && y1 == y2;
+        boolean yChange = (y1 == (y2+1) | y1 == (y2-1)) && x1 == x2;
 
-        if(x_change | y_change){
-            int save = gridCalculate.getGrid(x1,y1);
+        if(xChange | yChange){
+            int save = gridCalculate.getGrid(y1,x1);
 
-            gridCalculate.setGrid(gridCalculate.getGrid(x2,y2),x1,y1);
-            gridCalculate.setGrid(save,x2,y2);
+            gridCalculate.setGrid(gridCalculate.getGrid(y2,x2),y1,x1);
+            gridCalculate.setGrid(save,y2,x2);
 
-            int saveSpecial = gridCalculate.getSpecialGrid(x1,y1);
-            gridCalculate.setSpecialGrid(gridCalculate.getSpecialGrid(x2,y2),x1,y2);
-            gridCalculate.setSpecialGrid(saveSpecial,x2,y2);
+            int saveSpecial = gridCalculate.getSpecialGrid(y1,x1);
+            gridCalculate.setSpecialGrid(gridCalculate.getSpecialGrid(y2,x2),y1,x1);
+            gridCalculate.setSpecialGrid(saveSpecial,y2,x2);
 
             return true;
 
@@ -275,19 +276,19 @@ public class CandyJPanel extends JPanel {
 
 
     private boolean isFive(){
-        int x1 = x_clicked.get(x_clicked.size()-1);
-        int y1 = y_clicked.get(y_clicked.size()-1);
+        int x1 = xClicked.get(xClicked.size()-1);
+        int y1 = yClicked.get(yClicked.size()-1);
 
-        int x2 = x_clicked.get(x_clicked.size()-2);
-        int y2 = y_clicked.get(y_clicked.size()-2);
+        int x2 = xClicked.get(xClicked.size()-2);
+        int y2 = yClicked.get(yClicked.size()-2);
 
-        if(gridCalculate.getSpecialGrid(x1,y1) == 5) {
-            gridCalculate.setSpecialGrid(0, x1,y1);
-            elementToRemove = gridCalculate.getGrid(x2,y2);
+        if(gridCalculate.getSpecialGrid(y1,x1) == 5) {
+            gridCalculate.setSpecialGrid(0, y1,x1);
+            elementToRemove = gridCalculate.getGrid(y2,x2);
             return true;
-        } else if(gridCalculate.getSpecialGrid(x2, y2) == 5){
-            gridCalculate.setSpecialGrid(0, x2,y2);
-            elementToRemove = gridCalculate.getGrid(x1,y1);
+        } else if(gridCalculate.getSpecialGrid(y2, x2) == 5){
+            gridCalculate.setSpecialGrid(0, y2,x2);
+            elementToRemove = gridCalculate.getGrid(y1,x1);
             return true;
         } else {
             return false;

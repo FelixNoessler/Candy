@@ -11,7 +11,7 @@ public class CandyJFrame extends JFrame {
 
         // default values
         final int[] yCells = {20};
-        final int[] xCells = {3};
+        final int[] xCells = {30};
         int[] colors = {3};
 
         // create the JPanel

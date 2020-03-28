@@ -31,8 +31,8 @@ public class CandyGrid {
         grid = new int[ySize][xSize];
         specialGrid = new int[ySize][xSize];
 
-        for(int yIterator = 0; yIterator < ySize; yIterator++){
-            for(int xIterator = 0; xIterator < xSize; xIterator++){
+        for(int yIterator = 0; yIterator < grid.length; yIterator++){
+            for(int xIterator = 0; xIterator < grid[yIterator].length; xIterator++){
                 grid[yIterator][xIterator] = r.nextInt(numberOfColors);
 
                 // set the special array to 0's
@@ -61,13 +61,14 @@ public class CandyGrid {
         boolean breakLoop = false;
 
         y_outerloop:
-        for (int yIterator = 0; yIterator < grid[0].length; yIterator++) {
-            for (int xIterator = 0; xIterator < grid.length; xIterator++) {
 
-                actualNumber = grid[xIterator][yIterator];
+        for (int yIterator = 0; yIterator < grid.length; yIterator++) {
+            for (int xIterator = 0; xIterator < grid[yIterator].length; xIterator++) {
+
+                actualNumber = grid[yIterator][xIterator];
 
                 if (xIterator - 1 < 0) lastNumber = 999;
-                else lastNumber = grid[xIterator - 1][yIterator];
+                else lastNumber = grid[yIterator][xIterator - 1];
 
                 if (actualNumber != lastNumber){
                     horizontalRepeats = 1;
@@ -76,7 +77,7 @@ public class CandyGrid {
                 } else  {
                     horizontalRepeats++;
 
-                    int special = specialGrid[xIterator][yIterator];
+                    int special = specialGrid[yIterator][xIterator];
                     if(special == 4 | special == 3){
                         isFour = true;
                         fourXPosition = xIterator;
@@ -90,17 +91,17 @@ public class CandyGrid {
                     int i = 1;
                     while (true) {
                         //checks that we are in the grid
-                        if ((xIterator + i) > (grid.length - 1)) break;
+                        if ((xIterator + i) > (grid[0].length - 1)) break;
 
-                        int nextNumber = grid[xIterator + i][yIterator];
+                        int nextNumber = grid[yIterator][xIterator + i];
 
                         if (nextNumber == actualNumber) horizontalRepeats++;
                         else break;
                         i++;
                     }
 
-                    xEnd = xIterator;
                     yRow = yIterator;
+                    xEnd = xIterator;
                     breakLoop = true;
                     break y_outerloop;
                 }
@@ -119,8 +120,8 @@ public class CandyGrid {
             }
 
             if (isFour) {
-                combineFour(yRow, fourLine, grid[xStart][yRow]);
-                specialGrid[fourXPosition][yRow] = 0;
+                combineFour(yRow, fourLine, grid[yRow][xStart]);
+                specialGrid[yRow][fourXPosition] = 0;
             } else {
                 removeFromRow(xClick1, xClick2, xStart, xEnd, yRow);
             }
@@ -134,31 +135,32 @@ public class CandyGrid {
 
     private void removeFromRow(int xClick1, int xClick2, int xStart, int xEnd, int yRow) {
         int dif = xEnd - xStart;
-        int origColor = grid[xStart+1][yRow];
+        int origColor = grid[yRow][xStart];
 
-        for(int yIterator = yRow; yIterator >= 0; yIterator--){
+        for(int yToTop = yRow; yToTop >= 0; yToTop--){
             for(int xIterator = xStart; xIterator <= xEnd; xIterator++){
-                if(yIterator == 0){
-                    grid[xIterator][yIterator] = r.nextInt(numberOfColors);
-                    specialGrid[xIterator][yIterator] = 0;
+
+                if(yToTop == 0){
+                    grid[yToTop][xIterator] = r.nextInt(numberOfColors);
+                    specialGrid[yToTop][xIterator] = 0;
                 }else {
-                    grid[xIterator][yIterator] = grid[xIterator][yIterator -1];
-                    specialGrid[xIterator][yIterator] = specialGrid[xIterator][yIterator -1];
+                    grid[yToTop][xIterator] = grid[yToTop -1][xIterator];
+                    specialGrid[yToTop][xIterator] = specialGrid[yToTop-1][xIterator];
                 }
             }
 
         }
 
-        int xSpecial = whichElementIsMoved(xStart, xEnd, xClick1, xClick2);
+        int xSpecial = whichElementIsInThree(xStart, xEnd, xClick1, xClick2);
 
 
         if((dif+1) == 4) {
             System.out.println("Four!!!");
-            setSpecialElement(origColor, xSpecial, yRow, true, true);
+            setSpecialElement(origColor, yRow, xSpecial,true, true);
         }
         else if((dif+2) >= 5) {
             System.out.println("Five!!!");
-            setSpecialElement(origColor, xSpecial, yRow, false, true);
+            setSpecialElement(origColor, yRow,xSpecial, false, true);
         }
 
     }
@@ -175,18 +177,18 @@ public class CandyGrid {
         int xCol = 0, yEnd = 0;
         boolean breakLoop = false;
 
-        x_outerloop:
-        for (int xIterator = 0; xIterator < grid.length; xIterator++) {
-            for (int yIterator = 0; yIterator < grid[0].length; yIterator++) {
-                actualNumber = grid[xIterator][yIterator];
+        outerLoop:
+        for (int xIterator = 0; xIterator < grid[0].length; xIterator++) {
+            for (int yIterator = 0; yIterator < grid.length; yIterator++) {
+                actualNumber = grid[yIterator][xIterator];
 
                 if (yIterator - 1 < 0) lastNumber = 999;
-                else lastNumber = grid[xIterator][yIterator-1];
+                else lastNumber = grid[yIterator-1][xIterator];
 
                 if (actualNumber == lastNumber) {
                     verticalRepeats++;
 
-                    int special = specialGrid[xIterator][yIterator];
+                    int special = specialGrid[yIterator][xIterator];
                     if (special == 4 | special == 3) {
                         isFour = true;
                         fourYPosition = yIterator;
@@ -206,9 +208,9 @@ public class CandyGrid {
 
                     while (true) {
                         //checks that we are in the grid
-                        if ((yIterator + i) > (grid[0].length - 1)) break;
+                        if ((yIterator + i) > (grid.length - 1)) break;
 
-                        int nextNumber = grid[xIterator][yIterator+1];
+                        int nextNumber = grid[yIterator+1][xIterator];
 
                         if (nextNumber == actualNumber) verticalRepeats++;
                         else break;
@@ -218,7 +220,7 @@ public class CandyGrid {
                     xCol = xIterator;
                     yEnd = yIterator;
                     breakLoop = true;
-                    break x_outerloop;
+                    break outerLoop;
                 }
             }
         }
@@ -234,9 +236,9 @@ public class CandyGrid {
             }
 
             if (isFour) {
-                int origElement = grid[xCol][yStart];
+                int origElement = grid[yStart][xCol];
                 combineFour(xCol, fourLine, origElement);
-                specialGrid[xCol][fourYPosition] = 0;
+                specialGrid[fourYPosition][xCol] = 0;
 
             } else removeFromCol(yClick1, yClick2, yStart, yEnd, xCol);
 
@@ -249,32 +251,32 @@ public class CandyGrid {
 
     private void removeFromCol(int yClick1, int yClick2, int yStart, int yEnd, int xCol) {
         int dif = yEnd - yStart;
-        int origColor = grid[xCol][yStart];
+        int origColor = grid[yStart][xCol];
 
-        for (int y_iterator = yEnd; y_iterator >= 0; y_iterator--) {
-            if ((y_iterator - dif) >= 0) {
-                grid[xCol][y_iterator] = grid[xCol][y_iterator - dif];
-                specialGrid[xCol][y_iterator] = specialGrid[xCol][y_iterator - dif];
+        for (int yToTop = yEnd; yToTop >= 0; yToTop--) {
+            if ((yToTop - dif) >= 0) {
+                grid[yToTop][xCol] = grid[yToTop - dif][xCol];
+                specialGrid[yToTop][xCol] = specialGrid[yToTop - dif][xCol];
             } else {
-                grid[xCol][y_iterator] = r.nextInt(numberOfColors);
-                specialGrid[xCol][y_iterator] = 0;
+                grid[yToTop][xCol] = r.nextInt(numberOfColors);
+                specialGrid[yToTop][xCol] = 0;
             }
         }
 
 
-        int ySpecial = whichElementIsMoved(yStart, yEnd, yClick1, yClick2);
+        int ySpecial = whichElementIsInThree(yStart, yEnd, yClick1, yClick2);
 
         if ((dif + 1) == 4) {
             System.out.println("Four!!!");
-            setSpecialElement(origColor, xCol, ySpecial, true, false);
+            setSpecialElement(origColor,  ySpecial, xCol, true, false);
         } else if ((dif + 2) >= 5) {
             System.out.println("Five!!!");
-            setSpecialElement(origColor, xCol, ySpecial, false, false);
+            setSpecialElement(origColor, ySpecial, xCol, false, false);
         }
     }
 
 
-    private int whichElementIsMoved(int start, int end, int test1, int test2) {
+    private int whichElementIsInThree(int start, int end, int test1, int test2) {
         boolean isTest1 = false;
 
         for (int i = 0; i <= end; i++) {
@@ -288,15 +290,15 @@ public class CandyGrid {
         else return test2;
     }
 
-    private void setSpecialElement(int origElement, int x, int y, boolean isFour, boolean isLine) {
+    private void setSpecialElement(int origElement, int y, int x, boolean isFour, boolean isLine) {
         // four elements in one row
-        if (isFour && isLine) specialGrid[x][y] = 4;
+        if (isFour && isLine) specialGrid[y][x] = 4;
         // four elements in one col
-        else if(isFour) specialGrid[x][y] = 3;
+        else if(isFour) specialGrid[y][x] = 3;
         // five elements in one row/col
-        else specialGrid[x][y] = 5;
+        else specialGrid[y][x] = 5;
 
-        grid[x][y] = origElement;
+        grid[y][x] = origElement;
     }
 
 
