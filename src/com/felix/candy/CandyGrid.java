@@ -1,12 +1,8 @@
 package com.felix.candy;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Random;
 
-public class CandyGrid {
+public class CandyGrid extends CandyJPanel {
 
     private int points = 0;
     private int[][] grid;
@@ -17,20 +13,9 @@ public class CandyGrid {
 
 
 
-    public CandyGrid(int numberOfColors){
+    public CandyGrid(int numberOfColors) {
+        super();
         this.numberOfColors = numberOfColors;
-
-
-
-
-
-//        t = new javax.swing.Timer(2000, new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                System.out.println("Huch");
-//            }
-//        });
-//
-//        t.setRepeats(false);
     }
 
     public int getPoints(){ return this.points; }
@@ -52,12 +37,11 @@ public class CandyGrid {
 
         for(int yIterator = 0; yIterator < grid.length; yIterator++){
             for(int xIterator = 0; xIterator < grid[yIterator].length; xIterator++){
-                //t.start();
+
                 grid[yIterator][xIterator] = r.nextInt(numberOfColors);
-                //super.repaint();
+
                 // set the special array to 0's
                 specialGrid[yIterator][xIterator] = 0;
-                //t.stop();
             }
         }
     }
@@ -175,11 +159,11 @@ public class CandyGrid {
 
 
         if((dif+1) == 4) {
-            System.out.println("Four!!!");
+           //  System.out.println("Four!!!");
             setSpecialElement(origColor, yRow, xSpecial,true, true);
         }
         else if((dif+2) >= 5) {
-            System.out.println("Five!!!");
+            // System.out.println("Five!!!");
             setSpecialElement(origColor, yRow,xSpecial, false, true);
         }
 
@@ -287,10 +271,10 @@ public class CandyGrid {
         int ySpecial = whichElementIsInThree(yStart, yEnd, yClick1, yClick2);
 
         if ((dif + 1) == 4) {
-            System.out.println("Four!!!");
+            // System.out.println("Four!!!");
             setSpecialElement(origColor,  ySpecial, xCol, true, false);
         } else if ((dif + 2) >= 5) {
-            System.out.println("Five!!!");
+            // System.out.println("Five!!!");
             setSpecialElement(origColor, ySpecial, xCol, false, false);
         }
     }
@@ -323,7 +307,6 @@ public class CandyGrid {
 
 
     public void combineFive(int elementToRemove){
-
         for(int xIterator = 0; xIterator < grid.length; xIterator++){
             for(int yIterator = 0; yIterator < grid[0].length; yIterator++){
                 int el = grid[xIterator][yIterator];
@@ -334,6 +317,7 @@ public class CandyGrid {
 
                 if(elementToRemove == el){
                     this.points++;
+                    super.repaint();
                     int yToTop = yIterator;
                     while(yToTop > 0){
                         grid[xIterator][yToTop] = grid[xIterator][yToTop-1];
@@ -344,15 +328,16 @@ public class CandyGrid {
                 }
             }
         }
+
     }
 
 
     public void combineFour(int rowOrCol, boolean isLine, int origColor){
         if(isLine){
-            System.out.println("Remove line");
+            // System.out.println("Remove line");
             for (int xIterator = 0; xIterator < grid.length; xIterator++) {
                 for (int toTop = rowOrCol; toTop >= 0; toTop--) {
-                    runFourFive(origColor, xIterator, toTop);
+                    runFourFive(origColor,toTop, xIterator);
 
                     if (toTop != 0) {
                         grid[xIterator][toTop] = grid[xIterator][toTop - 1];
@@ -363,25 +348,25 @@ public class CandyGrid {
                 }
             }
         } else {
-            System.out.println("Remove column");
+            // System.out.println("Remove column");
             for (int yIterator = 0; yIterator < grid[1].length; yIterator++) {
                 this.points++;
                 grid[rowOrCol][yIterator] = r.nextInt(numberOfColors);
 
-                runFourFive(origColor, rowOrCol, yIterator);
+                runFourFive(origColor, yIterator, rowOrCol);
             }
         }
     }
 
-    private void runFourFive(int origColor, int i, int toTop) {
-        if(specialGrid[i][toTop] == 3){
-            specialGrid[i][toTop] = 0;
-            combineFour(i, false, origColor);
-        } else if(specialGrid[i][toTop] == 4){
-            specialGrid[i][toTop] = 0;
-            combineFour(toTop, true, origColor);
-        }else if(specialGrid[i][toTop] == 5){
-            specialGrid[i][toTop] = 0;
+    private void runFourFive(int origColor, int y, int x) {
+        if(specialGrid[y][x] == 3){
+            specialGrid[y][x] = 0;
+            combineFour(y, false, origColor);
+        } else if(specialGrid[y][x] == 4){
+            specialGrid[y][x] = 0;
+            combineFour(x, true, origColor);
+        }else if(specialGrid[y][x] == 5){
+            specialGrid[y][x] = 0;
             combineFive(origColor);
         }
     }

@@ -5,31 +5,18 @@ import javax.swing.event.ChangeEvent;
 import java.awt.*;
 
 public class CandyJFrame extends JFrame {
-
-    private JLabel pointLabel1;
+    CandyJPanel gridPanel;
 
     public CandyJFrame() {
         this.setLayout(new FlowLayout());
 
         // default values
-        final int[] yCells = {5};
-        final int[] xCells = {5};
-        int[] colors = {4};
-
-        // create the JPanel
-        CandyJPanel gridPanel = new CandyJPanel(yCells[0], xCells[0], colors[0]);
-        this.add(gridPanel);
-
-        JPanel asd = new JPanel();
-        this.add(asd);
-
-        pointLabel1 = new JLabel("0");
-        this.add(pointLabel1);
-
+        final int[] yCells = {15};
+        final int[] xCells = {15};
+        int[] colors = {6};
 
         // JTextField xSize
         JTextField fieldXSize = new JTextField(String.valueOf(xCells[0]), 10);
-        //fieldXSize.setBounds(240, yCells[0] * 30 + 30, 50, 30);
         fieldXSize.setPreferredSize(new Dimension(20,20));
         this.add(fieldXSize);
 
@@ -45,15 +32,28 @@ public class CandyJFrame extends JFrame {
         startButton.setBounds(10, yCells[0] * 30 + 30, 100, 30);
         this.add(startButton);
         startButton.addActionListener(e -> {
+
             xCells[0] = Integer.parseInt(fieldXSize.getText());
             yCells[0] = Integer.parseInt(fieldYSize.getText());
+
+            int width  = xCells[0] * 30 + 20;
+            int height = yCells[0] * 30 + 40;
+
+            this.remove(gridPanel);
+            gridPanel.setLayout(new FlowLayout(FlowLayout.RIGHT,20,height-30));
+            gridPanel.setPreferredSize(new Dimension(width,height));
+            this.add(gridPanel);
+
             gridPanel.setXYSize(xCells[0], yCells[0]);
             gridPanel.setNumberOfColors(colors[0]);
             gridPanel.setFirstTime(true);
             gridPanel.setPointsToZero();
             gridPanel.setPointLabel("0");
-            this.pointLabel1.setText("0");
             gridPanel.repaint();
+
+            this.setPreferredSize(new Dimension(width, height+150));
+            this.setSize(new Dimension(width, height+150));
+            this.pack();
         });
 
 
@@ -66,22 +66,21 @@ public class CandyJFrame extends JFrame {
         colSlider.addChangeListener((ChangeEvent event) -> colors[0] = colSlider.getValue());
         this.add(colSlider);
 
+        // create the JPanel
+        gridPanel = new CandyJPanel(yCells[0], xCells[0], colors[0]);
+        this.add(gridPanel);
 
-        int widthFrame = xCells[0] * 30 + 60;
-        if(widthFrame < 380) widthFrame = 380;
-        int heightFrame = yCells[0] * 30 + 100;
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        int widthFrame = xCells[0] * 30+20, heightFrame = yCells[0] * 30 + 190;
         this.setPreferredSize(new Dimension(widthFrame, heightFrame));
 
         this.setLocationRelativeTo(null);
-        this.setResizable(false);
         this.pack();
         this.setVisible(true);
 
-    }
 
-    public void setPointLabel1(String points){
-        this.pointLabel1.setText(points);
+
     }
 
     public static void main(String [] args) {

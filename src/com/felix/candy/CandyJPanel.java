@@ -28,19 +28,18 @@ public class CandyJPanel extends JPanel {
 
     // saves the rgb values of the colors in an array
     private Color[] colorArray;
+    private JPanel candyPanel;
 
     public CandyJPanel(int ySize, int xSize, int numberOfColors) {
-        super();
+
         this.ySize = ySize;
         this.xSize = xSize;
-        this.setDoubleBuffered(true);
+        //this.setDoubleBuffered(true);
 
         this.numberOfColors = numberOfColors;
 
-
         // Label for the points (3 fields destroyed = 3 points)
         pointLabel = new JLabel("0");
-       // pointLabel.setBounds(xSize *30+20,1000,70,30);
         this.add(pointLabel);
 
         // MouseListener - looks for the clicks of the mouse
@@ -62,10 +61,7 @@ public class CandyJPanel extends JPanel {
                         gridCalculate.combineFive(elementToRemove);
 
                         repaint();
-                        //super.setText(String.valueOf(gridCalculate.getPoints()));
-                        //super.
-
-                        super.setPointLabel1("asd");
+                        pointLabel.setText(String.valueOf(gridCalculate.getPoints()));
 
                         //empty clicked Arraylist to avoid not wanted clicks
                         xClicked.clear();
@@ -114,8 +110,10 @@ public class CandyJPanel extends JPanel {
         });
 
 
-        int widthPanel = xSize *30+60, heightPanel = ySize *30+20;
-        this.setPreferredSize(new Dimension(widthPanel,heightPanel));
+        int widthPanel = xSize * 30+20, heightPanel = ySize * 30+40;
+        this.setPreferredSize(new Dimension(widthPanel, heightPanel));
+        this.setLayout(new FlowLayout(FlowLayout.RIGHT,20,heightPanel-30));
+        this.setToolTipText("Click!");
     }
 
     public CandyJPanel(){}
@@ -132,6 +130,7 @@ public class CandyJPanel extends JPanel {
     public void setXYSize(int x, int y){ this.xSize = x; this.ySize = y; }
     // end of getter/setter methods...............
 
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if(firstTime) {
