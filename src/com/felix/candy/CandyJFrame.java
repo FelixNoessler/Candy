@@ -23,7 +23,6 @@ public class CandyJFrame extends JFrame {
 
         // JTextField ySize
         JTextField fieldYSize = new JTextField(String.valueOf(yCells[0]), 10);
-        //fieldYSize.setBounds(320, yCells[0] * 30 + 30, 50, 30);
         this.add(fieldYSize);
 
 

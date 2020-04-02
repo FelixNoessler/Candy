@@ -109,14 +109,11 @@ public class CandyJPanel extends JPanel {
                         //empty clicked Arraylist to avoid not wanted clicks
                         xClicked.clear();
                         yClicked.clear();
-
                         return;
                     }
 
                     // if neighbours, than the function changes the position
-                    boolean neighbours = false;
-
-                    neighbours = changePosition(false);
+                    boolean neighbours = changePosAndCheck(false);
 
                     if(neighbours){
                         int xClick1 = xClicked.get(xClicked.size()-1);
@@ -125,13 +122,13 @@ public class CandyJPanel extends JPanel {
                         int xClick2 = xClicked.get(xClicked.size()-2);
                         int yClick2 = yClicked.get(yClicked.size()-2);
 
-                        if(checkGrid(xClick1, xClick2, yClick1, yClick2, true)) {
+                        if(removeAndCheckGrid(xClick1, xClick2, yClick1, yClick2, true)) {
                             repaint();
                             pointLabel.setText(String.valueOf(points));
 
                         } else{
                             System.out.println("No change (changed back)!");
-                            changePosition(true);
+                            changePosAndCheck(true);
                         }
                     }
 
@@ -177,7 +174,7 @@ public class CandyJPanel extends JPanel {
         drawGrid(g);
 
         //recheck the  grid:
-        if(checkGrid(999, 999, 999, 999, false)) repaint();
+        if(removeAndCheckGrid(999, 999, 999, 999, false)) repaint();
     }
 
     private void drawGrid(Graphics g){
@@ -188,8 +185,8 @@ public class CandyJPanel extends JPanel {
 
         for (int y = 10; y < yMax; y += 30){
             for (int x = 10; x < xMax; x += 30) {
-                int no;
-                no = grid[yCell][xCell];
+
+                int no = grid[yCell][xCell];
                 int special = specialGrid[yCell][xCell];
 
                 if(special == 4 | special == 3){
@@ -197,7 +194,6 @@ public class CandyJPanel extends JPanel {
                     drawFour(g, y, x, special, no);
 
                 } else if(special == 5){
-                    // draw black or orange color
                     drawFive(g, y, x);
 
                 } else {
@@ -206,8 +202,8 @@ public class CandyJPanel extends JPanel {
                     g.fillRect( x, y, 25, 25 );
 
                     // boundaries of the rectangle
-                    //g.setColor( Color.GRAY );
-                    //g.drawRect( x -1, y - 1, 25, 25 );
+                    g.setColor( Color.GRAY );
+                    g.drawRect( x-1, y-1, 25, 25 );
                 }
 
                 xCell++;
@@ -240,6 +236,7 @@ public class CandyJPanel extends JPanel {
     }
 
     private void drawFive(Graphics g, int y, int x) {
+        // draw black or orange color
         boolean drawBlack = false;
 
         for(int xFive = 0; xFive < 5; xFive++){
@@ -286,7 +283,7 @@ public class CandyJPanel extends JPanel {
         }
     }
 
-    private boolean changePosition(boolean back) {
+    private boolean changePosAndCheck(boolean back) {
         int x1, x2, y1, y2;
 
         if(!back){
@@ -372,7 +369,7 @@ public class CandyJPanel extends JPanel {
     }
 
 
-    public boolean checkGrid(int xClick1, int xClick2, int yClick1, int yClick2, boolean mouseClick){
+    public boolean removeAndCheckGrid(int xClick1, int xClick2, int yClick1, int yClick2, boolean mouseClick){
         // true = changes!, false = no changes
         if(checkGridHorizontal(xClick1, xClick2, mouseClick)) return true;
         return checkGridVertical(yClick1, yClick2, mouseClick);
