@@ -15,6 +15,7 @@ public class CandyJFrame extends JFrame {
         final int[] xCells = {15};
         int[] colors = {6};
 
+
         // JTextField xSize
         JTextField fieldXSize = new JTextField(String.valueOf(xCells[0]), 10);
         fieldXSize.setPreferredSize(new Dimension(20,20));
@@ -31,7 +32,6 @@ public class CandyJFrame extends JFrame {
         startButton.setBounds(10, yCells[0] * 30 + 30, 100, 30);
         this.add(startButton);
         startButton.addActionListener(e -> {
-
             xCells[0] = Integer.parseInt(fieldXSize.getText());
             yCells[0] = Integer.parseInt(fieldYSize.getText());
 
@@ -39,16 +39,8 @@ public class CandyJFrame extends JFrame {
             int height = yCells[0] * 30 + 40;
 
             this.remove(gridPanel);
-            gridPanel.setLayout(new FlowLayout(FlowLayout.RIGHT,20,height-30));
-            gridPanel.setPreferredSize(new Dimension(width,height));
+            gridPanel = new CandyJPanel(yCells[0], xCells[0], colors[0]);
             this.add(gridPanel);
-
-            gridPanel.setXYSize(xCells[0], yCells[0]);
-            gridPanel.setNumberOfColors(colors[0]);
-            gridPanel.setFirstTime(true);
-            gridPanel.setPoints(0);
-            gridPanel.setPointLabel("0");
-            gridPanel.repaint();
 
             this.setPreferredSize(new Dimension(width, height+150));
             this.setSize(new Dimension(width, height+150));

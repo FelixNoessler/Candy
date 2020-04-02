@@ -13,15 +13,17 @@ import javax.swing.*;
 
 public class CandyJPanel extends JPanel {
 
-    private int points = 0;
+    private int xSize, ySize;
     private int[][] grid;
     private int[][] specialGrid;
+
+    private int points;
+
+    // saves the rgb values of the colors in an array
     private int numberOfColors;
+    private Color[] colorArray;
 
     private Random r = new Random();
-    private int xSize, ySize;
-    private boolean firstTime = true;
-    private JLabel pointLabel;
 
     //special elements:
     private int elementToRemove;
@@ -30,64 +32,68 @@ public class CandyJPanel extends JPanel {
     private ArrayList<Integer> xClicked = new ArrayList<>();
     private ArrayList<Integer> yClicked = new ArrayList<>();
 
-    // saves the rgb values of the colors in an array
-    private Color[] colorArray;
-    private JPanel candyPanel;
-
-
-    // TODO timer
-    javax.swing.Timer t;
-
+    // animation for the change of the position
     javax.swing.Timer changePosTimer;
-    int yClick1;
-    int xClick1;
-    int yClick2;
-    int xClick2;
-    boolean animation;
+    int yClick1, xClick1;   // first click
+    int yClick2, xClick2;   // second click
+    volatile boolean posAnimation = false;   // true -> animation
     boolean toBottom, toTop;
     boolean toRight, toLeft;
-    int animationsCounter = 0;
+    int posCounter;         // 0 - 30
+
+    // animation for the vertical movement
+    javax.swing.Timer removeColTimer;
+    boolean removeColAnimation = false;
+    int removeColYStart, removeColYEnd;
+    int removeColX;
+    int colCounter;
 
     public CandyJPanel(int ySize, int xSize, int numberOfColors) {
         this.ySize = ySize;
         this.xSize = xSize;
         this.numberOfColors = numberOfColors;
 
-        //TODO timer
-        t = new javax.swing.Timer(1000, new ActionListener() {
+        changePosTimer = new javax.swing.Timer(50, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                points++;
-
-
-                System.out.println(points);
-            }
-        });
-
-        t.setRepeats(true);
-        //t.start();
-
-        changePosTimer = new javax.swing.Timer(5, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(animationsCounter < 30){
-                    animation = true;
-                    animationsCounter++;
+                if(posCounter < 30){
+                    posAnimation = true;
+                    posCounter++;
                     repaint();
                 }else{
-                    animation = false;
-                    animationsCounter = 0;
-                    //repaint();
+                    posAnimation = false;
+                    posCounter = 0;
                     changePosTimer.stop();
                 }
             }
         });
 
-        changePosTimer.setRepeats(true);
+        removeColTimer = new javax.swing.Timer(20, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //int dif =  removeColYStart - removeColYEnd + 1;
+                toLeft = false; toRight = false;
+                toTop = false; toBottom = true;
+
+                //for(int i = 0; i < dif; i++){
+                    if(colCounter < 30){
+                        removeColAnimation = true;
+                        colCounter++;
+                        repaint();
+                    }else{
+                        colCounter = 0;
+                        removeColYEnd = -1;
+                        removeColAnimation = false;
+                        removeColTimer.stop();
+                    }
+                //}
+            }
+        });
 
         // Label for the points (3 fields destroyed = 3 points)
-        pointLabel = new JLabel("0");
+        JLabel pointLabel = new JLabel("0");
         this.add(pointLabel);
+        this.points = 0;
 
         // MouseListener - looks for the clicks of the mouse
         this.addMouseListener(new MouseListener(){
@@ -100,29 +106,32 @@ public class CandyJPanel extends JPanel {
                 // saves the position into the Arraylist
                 xClicked.add(getX);
                 yClicked.add(getY);
-
+                System.out.println(posAnimation);
                 // to avoid to run with one click
-                if(xClicked.size() > 1){
+                if(xClicked.size() > 1 & !posAnimation){
 
-//                    if(isFive()) {
-//                        combineFive(elementToRemove);
-//
-//                        repaint();
-//                        pointLabel.setText(String.valueOf(points));
-//
-//                        //empty clicked Arraylist to avoid not wanted clicks
-//                        xClicked.clear();
-//                        yClicked.clear();
-//
-//                        return;
-//                    }
+                    if(isFive()) {
+                        combineFive(elementToRemove);
+
+                        repaint();
+                        pointLabel.setText(String.valueOf(points));
+
+                        //empty clicked Arraylist to avoid not wanted clicks
+                        xClicked.clear();
+                        yClicked.clear();
+
+                        return;
+                    }
 
                     // if neighbours, than the function changes the position
 
                     boolean neighbours = changePosAndCheck(false);
+
+
                     //first click
                     xClick1 = xClicked.get(xClicked.size()-2);
                     yClick1 = yClicked.get(yClicked.size()-2);
+
                     //second click
                     xClick2 = xClicked.get(xClicked.size()-1);
                     yClick2 = yClicked.get(yClicked.size()-1);
@@ -133,21 +142,29 @@ public class CandyJPanel extends JPanel {
                     toBottom = yClick2 > yClick1;
 
 
-                    //TODO changePosAndCheck(true);
+                    if(neighbours){
+                        if(removeAndCheckGrid(xClick2, xClick1, yClick2, yClick1, true)) {
+                            System.out.println("Change");
+                            //repaint();
+                            pointLabel.setText(String.valueOf(points));
 
-//                    if(neighbours){
+                        } else{
+                            System.out.println("Changed back!");
+                            int save = xClick1;
+                            xClick1 = xClick2;
+                            xClick2 = save;
 
-//
-//                        if(removeAndCheckGrid(xClick1, xClick2, yClick1, yClick2, true)) {
-//                            System.out.println("Change");
-//                            repaint();
-//                            pointLabel.setText(String.valueOf(points));
-//
-//                        } else{
-//                            System.out.println("Changed back!");
-//                            changePosAndCheck(true);
-//                        }
-//                    }
+                            save = yClick1;
+                            yClick1 = yClick2;
+                            yClick2 = save;
+
+                            changePosAndCheck(true);
+
+                            while (posAnimation) {
+                                Thread.onSpinWait();
+                            }
+                        }
+                    }
 
                     //empty clicked Arraylist to avoid not wanted clicks
                     xClicked.clear();
@@ -163,36 +180,19 @@ public class CandyJPanel extends JPanel {
         int widthPanel = xSize * 30+20, heightPanel = ySize * 30+40;
         this.setPreferredSize(new Dimension(widthPanel, heightPanel));
         this.setLayout(new FlowLayout(FlowLayout.RIGHT,20,heightPanel-30));
-        this.setToolTipText("Click!");
+        this.setToolTipText("Click for changing the rectangles!");
+
+        fillColorArray();
+        generateRandomArray(ySize, xSize);
+        removeAndCheckGrid(999,99,99,99,false);
     }
-
-    // getter/setter methods ..............
-    public void setPoints(int points){this.points = points; }
-
-    public void setFirstTime(boolean firstTime){ this.firstTime = firstTime; }
-
-    public void setNumberOfColors(int numberOfColors){ this.numberOfColors = numberOfColors; }
-
-    public void setPointLabel(String text){ this.pointLabel.setText(text); }
-
-    public void setXYSize(int x, int y){ this.xSize = x; this.ySize = y; }
-    // end of getter/setter methods...............
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if(firstTime) {
-            // do it only on startup
-            animation = false;
-            fillColorArray();
-            generateRandomArray(ySize, xSize);
-        }
-        firstTime = false;
-
         drawGrid(g);
 
-        //recheck the  grid:
-        //if(removeAndCheckGrid(999, 999, 999, 999, false)) repaint();
+        removeAndCheckGrid(999,99,99,99,false);
     }
 
     private void drawGrid(Graphics g){
@@ -210,22 +210,53 @@ public class CandyJPanel extends JPanel {
                 int no = grid[yCell][xCell];
                 int special = specialGrid[yCell][xCell];
 
-                if(yClick2 == yCell & xClick2 == xCell & animation){
+                boolean changePos = yClick2 == yCell & xClick2 == xCell & posAnimation;
+                boolean vertical = removeColYEnd  >= yCell &  removeColX == xCell & removeColAnimation;
+                //boolean vertical = false;
+
+                if(changePos | vertical){
+                    int move;
+
+                    if(changePos) move = posCounter;
+                    else move = colCounter;
 
                     aniCol =  colorArray[no];
 
                     if(toBottom){
                         xAni = x;
-                        yAni = y - 30 + animationsCounter;
+                        yAni = y - 30 + move;
+
+                        g.setColor(aniCol);
+                        g.fillRect(xAni,yAni,25,25);
+                        g.setColor(Color.GRAY);
+                        g.drawRect(xAni-1, yAni-1, 25, 25);
+
                     }else if(toTop){
                         xAni = x;
-                        yAni = y + 30 - animationsCounter;
+                        yAni = y + 30 - move;
+
+                        g.setColor(aniCol);
+                        g.fillRect(xAni,yAni,25,25);
+                        g.setColor(Color.GRAY);
+                        g.drawRect(xAni-1, yAni-1, 25, 25);
+
                     }else if(toRight){
-                        xAni = x - 30 + animationsCounter;
+                        xAni = x - 30 + move;
                         yAni = y;
+
+                        g.setColor(aniCol);
+                        g.fillRect(xAni,yAni,25,25);
+                        g.setColor(Color.GRAY);
+                        g.drawRect(xAni-1, yAni-1, 25, 25);
+
                     }else if(toLeft){
-                        xAni = x + 30 - animationsCounter;
+                        xAni = x + 30 - move;
                         yAni = y;
+
+                        g.setColor(aniCol);
+                        g.fillRect(xAni,yAni,25,25);
+                        g.setColor(Color.GRAY);
+                        g.drawRect(xAni-1, yAni-1, 25, 25);
                     }
                 }
 
@@ -252,7 +283,7 @@ public class CandyJPanel extends JPanel {
             yCell++;
         }
 
-        if(animation){
+        if(posAnimation){
             g.setColor(aniCol);
             g.fillRect(xAni,yAni,25,25);
             g.setColor(Color.GRAY);
@@ -363,6 +394,14 @@ public class CandyJPanel extends JPanel {
 
             changePosTimer.start();
 
+            while (posAnimation) {
+                System.out.println("In:" + posAnimation);
+                Thread.onSpinWait();
+
+            }
+
+            System.out.println("Out:" + posAnimation);
+
             return true;
 
         }else{
@@ -411,7 +450,7 @@ public class CandyJPanel extends JPanel {
     }
 
 
-    public boolean removeAndCheckGrid(int xClick1, int xClick2, int yClick1, int yClick2, boolean mouseClick){
+    private boolean removeAndCheckGrid(int xClick1, int xClick2, int yClick1, int yClick2, boolean mouseClick){
         // true = changes!, false = no changes
         if(checkGridHorizontal(xClick1, xClick2, mouseClick)) return true;
         return checkGridVertical(yClick1, yClick2, mouseClick);
@@ -626,7 +665,7 @@ public class CandyJPanel extends JPanel {
                 grid[yToTop][xCol] = grid[yToTop - dif][xCol];
                 specialGrid[yToTop][xCol] = specialGrid[yToTop - dif][xCol];
             } else {
-                grid[yToTop][xCol] = 0;//r.nextInt(numberOfColors) + 1;
+                grid[yToTop][xCol] = r.nextInt(numberOfColors) + 1;
                 specialGrid[yToTop][xCol] = 0;
             }
         }
@@ -641,6 +680,13 @@ public class CandyJPanel extends JPanel {
             // System.out.println("Five!!!");
             setSpecialElement(origColor, ySpecial, xCol, false, false);
         }
+
+        //TODO animation
+        //removeColTimer.start();
+        //removeColYStart = yStart;
+        //removeColYEnd = yEnd;
+        //removeColX = xCol;
+
     }
 
 
@@ -721,7 +767,7 @@ public class CandyJPanel extends JPanel {
     }
 
     private void runFourFive(int origColor, int y, int x) {
-        System.out.println("four/five");
+        //System.out.println("four/five");
         if(specialGrid[y][x] == 3){
             specialGrid[y][x] = 0;
             combineFour(y, false, origColor);
