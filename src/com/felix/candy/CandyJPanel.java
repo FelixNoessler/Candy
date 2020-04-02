@@ -206,8 +206,8 @@ public class CandyJPanel extends JPanel {
                     g.fillRect( x, y, 25, 25 );
 
                     // boundaries of the rectangle
-                    g.setColor( Color.GRAY );
-                    g.drawRect( x -1, y - 1, 25, 25 );
+                    //g.setColor( Color.GRAY );
+                    //g.drawRect( x -1, y - 1, 25, 25 );
                 }
 
                 xCell++;

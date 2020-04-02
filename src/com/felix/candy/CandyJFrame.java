@@ -54,10 +54,6 @@ public class CandyJFrame extends JFrame {
             this.setPreferredSize(new Dimension(width, height+150));
             this.setSize(new Dimension(width, height+150));
             this.pack();
-
-
-
-
         });
 
 
@@ -82,9 +78,6 @@ public class CandyJFrame extends JFrame {
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
-
-
-
     }
 
     public static void main(String [] args) {
@@ -105,6 +98,5 @@ public class CandyJFrame extends JFrame {
                 new com.felix.candy.CandyJFrame();
             }
         });
-        //
     }
 }
