@@ -47,13 +47,17 @@ public class CandyJFrame extends JFrame {
             gridPanel.setXYSize(xCells[0], yCells[0]);
             gridPanel.setNumberOfColors(colors[0]);
             gridPanel.setFirstTime(true);
-            gridPanel.setPointsToZero();
+            gridPanel.setPoints(0);
             gridPanel.setPointLabel("0");
             gridPanel.repaint();
 
             this.setPreferredSize(new Dimension(width, height+150));
             this.setSize(new Dimension(width, height+150));
             this.pack();
+
+
+
+
         });
 
 
