@@ -39,16 +39,19 @@ public class CandyJPanel extends JPanel {
     javax.swing.Timer t;
 
     javax.swing.Timer changePosTimer;
-    private int[] xChangePos;
-    private int[] yChangePos;
+    int yClick1;
+    int xClick1;
+    int yClick2;
+    int xClick2;
+    boolean animation;
+    boolean toBottom, toTop;
+    boolean toRight, toLeft;
+    int animationsCounter = 0;
 
     public CandyJPanel(int ySize, int xSize, int numberOfColors) {
         this.ySize = ySize;
         this.xSize = xSize;
         this.numberOfColors = numberOfColors;
-
-        xChangePos = new int[2];
-        yChangePos = new int[2];
 
         //TODO timer
         t = new javax.swing.Timer(1000, new ActionListener() {
@@ -64,22 +67,23 @@ public class CandyJPanel extends JPanel {
         t.setRepeats(true);
         //t.start();
 
-        changePosTimer = new javax.swing.Timer(0, new ActionListener() {
+        changePosTimer = new javax.swing.Timer(5, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.print("Posi: " + xChangePos[0] + " ");
-                System.out.print(xChangePos[1] + " ");
-                System.out.print(yChangePos[0]+ " ");
-                System.out.print(yChangePos[1]+ " ");
-
-
-
-
-                repaint();
+                if(animationsCounter < 30){
+                    animation = true;
+                    animationsCounter++;
+                    repaint();
+                }else{
+                    animation = false;
+                    animationsCounter = 0;
+                    //repaint();
+                    changePosTimer.stop();
+                }
             }
         });
 
-        changePosTimer.setRepeats(false);
+        changePosTimer.setRepeats(true);
 
         // Label for the points (3 fields destroyed = 3 points)
         pointLabel = new JLabel("0");
@@ -100,37 +104,50 @@ public class CandyJPanel extends JPanel {
                 // to avoid to run with one click
                 if(xClicked.size() > 1){
 
-                    if(isFive()) {
-                        combineFive(elementToRemove);
-
-                        repaint();
-                        pointLabel.setText(String.valueOf(points));
-
-                        //empty clicked Arraylist to avoid not wanted clicks
-                        xClicked.clear();
-                        yClicked.clear();
-                        return;
-                    }
+//                    if(isFive()) {
+//                        combineFive(elementToRemove);
+//
+//                        repaint();
+//                        pointLabel.setText(String.valueOf(points));
+//
+//                        //empty clicked Arraylist to avoid not wanted clicks
+//                        xClicked.clear();
+//                        yClicked.clear();
+//
+//                        return;
+//                    }
 
                     // if neighbours, than the function changes the position
+
                     boolean neighbours = changePosAndCheck(false);
+                    //first click
+                    xClick1 = xClicked.get(xClicked.size()-2);
+                    yClick1 = yClicked.get(yClicked.size()-2);
+                    //second click
+                    xClick2 = xClicked.get(xClicked.size()-1);
+                    yClick2 = yClicked.get(yClicked.size()-1);
 
-                    if(neighbours){
-                        int xClick1 = xClicked.get(xClicked.size()-1);
-                        int yClick1 = yClicked.get(yClicked.size()-1);
+                    toRight = xClick2 > xClick1;
+                    toLeft = xClick2 < xClick1;
+                    toTop = yClick2 < yClick1;
+                    toBottom = yClick2 > yClick1;
 
-                        int xClick2 = xClicked.get(xClicked.size()-2);
-                        int yClick2 = yClicked.get(yClicked.size()-2);
 
-                        if(removeAndCheckGrid(xClick1, xClick2, yClick1, yClick2, true)) {
-                            repaint();
-                            pointLabel.setText(String.valueOf(points));
+                    //TODO changePosAndCheck(true);
 
-                        } else{
-                            System.out.println("No change (changed back)!");
-                            changePosAndCheck(true);
-                        }
-                    }
+//                    if(neighbours){
+
+//
+//                        if(removeAndCheckGrid(xClick1, xClick2, yClick1, yClick2, true)) {
+//                            System.out.println("Change");
+//                            repaint();
+//                            pointLabel.setText(String.valueOf(points));
+//
+//                        } else{
+//                            System.out.println("Changed back!");
+//                            changePosAndCheck(true);
+//                        }
+//                    }
 
                     //empty clicked Arraylist to avoid not wanted clicks
                     xClicked.clear();
@@ -166,6 +183,7 @@ public class CandyJPanel extends JPanel {
         super.paintComponent(g);
         if(firstTime) {
             // do it only on startup
+            animation = false;
             fillColorArray();
             generateRandomArray(ySize, xSize);
         }
@@ -174,7 +192,7 @@ public class CandyJPanel extends JPanel {
         drawGrid(g);
 
         //recheck the  grid:
-        if(removeAndCheckGrid(999, 999, 999, 999, false)) repaint();
+        //if(removeAndCheckGrid(999, 999, 999, 999, false)) repaint();
     }
 
     private void drawGrid(Graphics g){
@@ -183,13 +201,35 @@ public class CandyJPanel extends JPanel {
         int yMax = 30* ySize +10;
         int xMax = 30* xSize +10;
 
+        int xAni = 0, yAni = 0;
+        Color aniCol = Color.WHITE;
+
         for (int y = 10; y < yMax; y += 30){
             for (int x = 10; x < xMax; x += 30) {
 
                 int no = grid[yCell][xCell];
                 int special = specialGrid[yCell][xCell];
 
-                if(special == 4 | special == 3){
+                if(yClick2 == yCell & xClick2 == xCell & animation){
+
+                    aniCol =  colorArray[no];
+
+                    if(toBottom){
+                        xAni = x;
+                        yAni = y - 30 + animationsCounter;
+                    }else if(toTop){
+                        xAni = x;
+                        yAni = y + 30 - animationsCounter;
+                    }else if(toRight){
+                        xAni = x - 30 + animationsCounter;
+                        yAni = y;
+                    }else if(toLeft){
+                        xAni = x + 30 - animationsCounter;
+                        yAni = y;
+                    }
+                }
+
+                else if(special == 4 | special == 3){
                     // four in one row
                     drawFour(g, y, x, special, no);
 
@@ -210,6 +250,13 @@ public class CandyJPanel extends JPanel {
             }
             xCell = 0;
             yCell++;
+        }
+
+        if(animation){
+            g.setColor(aniCol);
+            g.fillRect(xAni,yAni,25,25);
+            g.setColor(Color.GRAY);
+            g.drawRect(xAni-1, yAni-1, 25, 25);
         }
     }
 
@@ -304,13 +351,6 @@ public class CandyJPanel extends JPanel {
         boolean yChange = (y1 == (y2+1) | y1 == (y2-1)) && x1 == x2;
 
         if(xChange | yChange){
-            yChangePos[0] = y1;
-            yChangePos[1] = y2;
-            xChangePos[0] = x1;
-            xChangePos[1] = x2;
-
-            changePosTimer.start();
-
             // change grid cells
             int save = grid[y1][x1];
             grid[y1][x1] = grid[y2][x2];
@@ -320,6 +360,8 @@ public class CandyJPanel extends JPanel {
             save = specialGrid[y1][x1]; //gridCalculate.getSpecialGrid(y1,x1);
             specialGrid[y1][x1] = specialGrid[y2][x2];
             specialGrid[y2][x2] = save;
+
+            changePosTimer.start();
 
             return true;
 
@@ -467,20 +509,17 @@ public class CandyJPanel extends JPanel {
         for(int yToTop = yRow; yToTop >= 0; yToTop--){
             for(int xIterator = xStart; xIterator <= xEnd; xIterator++){
                 if(yToTop == 0){
-                    //super.repaint();
+
                     grid[yToTop][xIterator] = r.nextInt(numberOfColors) + 1;
                     specialGrid[yToTop][xIterator] = 0;
                 }else {
                     grid[yToTop][xIterator] = grid[yToTop -1][xIterator];
                     specialGrid[yToTop][xIterator] = specialGrid[yToTop-1][xIterator];
                 }
-
-                // Thread.sleep(2000);
-                // TODO insert repaint command
             }
         }
 
-        int xSpecial = whichElementIsInThree(xStart, xEnd, xClick1, xClick2);
+        int xSpecial = elementIn(xStart, xEnd, xClick1, xClick2);
 
 
         if((dif+1) == 4) {
@@ -587,17 +626,17 @@ public class CandyJPanel extends JPanel {
                 grid[yToTop][xCol] = grid[yToTop - dif][xCol];
                 specialGrid[yToTop][xCol] = specialGrid[yToTop - dif][xCol];
             } else {
-                grid[yToTop][xCol] = r.nextInt(numberOfColors) + 1;
+                grid[yToTop][xCol] = 0;//r.nextInt(numberOfColors) + 1;
                 specialGrid[yToTop][xCol] = 0;
             }
         }
 
 
-        int ySpecial = whichElementIsInThree(yStart, yEnd, yClick1, yClick2);
+        int ySpecial = elementIn(yStart, yEnd, yClick1, yClick2);
 
         if ((dif + 1) == 4) {
             // System.out.println("Four!!!");
-            setSpecialElement(origColor,  ySpecial, xCol, true, false);
+            setSpecialElement(origColor, ySpecial, xCol, true, false);
         } else if ((dif + 2) >= 5) {
             // System.out.println("Five!!!");
             setSpecialElement(origColor, ySpecial, xCol, false, false);
@@ -605,7 +644,7 @@ public class CandyJPanel extends JPanel {
     }
 
 
-    private int whichElementIsInThree(int start, int end, int test1, int test2) {
+    private int elementIn(int start, int end, int test1, int test2) {
         boolean isTest1 = false;
 
         for (int i = 0; i <= end; i++) {
@@ -642,7 +681,6 @@ public class CandyJPanel extends JPanel {
 
                 if(elementToRemove == el){
                     this.points++;
-                    // TODO super.repaint();
                     int yToTop = yIterator;
                     while(yToTop > 0){
                         grid[xIterator][yToTop] = grid[xIterator][yToTop-1];
@@ -658,31 +696,32 @@ public class CandyJPanel extends JPanel {
 
     public void combineFour(int rowOrCol, boolean isLine, int origColor){
         if(isLine){
-            // System.out.println("Remove line");
+            System.out.println("Remove line");
             for (int xIterator = 0; xIterator < grid.length; xIterator++) {
                 for (int toTop = rowOrCol; toTop >= 0; toTop--) {
                     runFourFive(origColor,toTop, xIterator);
 
                     if (toTop != 0) {
-                        grid[xIterator][toTop] = grid[xIterator][toTop - 1];
+                        this.grid[xIterator][toTop] = this.grid[xIterator][toTop - 1];
                     } else {
-                        grid[xIterator][toTop] = r.nextInt(numberOfColors) + 1;
-                        this.points++;
+                        this.grid[xIterator][toTop] = this.r.nextInt(numberOfColors) + 1;
                     }
+                    this.points++;
                 }
             }
         } else {
-            // System.out.println("Remove column");
-            for (int yIterator = 0; yIterator < grid[1].length; yIterator++) {
+            System.out.println("Remove column");
+            for (int yIterator = 0; yIterator < this.grid[1].length; yIterator++) {
                 this.points++;
-                grid[rowOrCol][yIterator] = r.nextInt(numberOfColors) + 1;
+                this.grid[rowOrCol][yIterator] = this.r.nextInt(numberOfColors) + 1;
 
-                runFourFive(origColor, yIterator, rowOrCol);
+                this.runFourFive(origColor, yIterator, rowOrCol);
             }
         }
     }
 
     private void runFourFive(int origColor, int y, int x) {
+        System.out.println("four/five");
         if(specialGrid[y][x] == 3){
             specialGrid[y][x] = 0;
             combineFour(y, false, origColor);
@@ -694,7 +733,5 @@ public class CandyJPanel extends JPanel {
             combineFive(origColor);
         }
     }
-
-
 }
 
