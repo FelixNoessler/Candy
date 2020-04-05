@@ -3,9 +3,11 @@ package com.felix.candy;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class CandyJFrame extends JFrame {
     CandyJPanel gridPanel;
+    Thread thread1;
 
     public CandyJFrame() {
         this.setLayout(new FlowLayout());
@@ -41,6 +43,10 @@ public class CandyJFrame extends JFrame {
             this.remove(gridPanel);
             gridPanel = new CandyJPanel(yCells[0], xCells[0], colors[0]);
             this.add(gridPanel);
+            //TODO should we stop the threat??
+            thread1 = new Thread(gridPanel, "new Thread");
+            thread1.start();
+
 
             this.setPreferredSize(new Dimension(width, height+150));
             this.setSize(new Dimension(width, height+150));
@@ -60,6 +66,8 @@ public class CandyJFrame extends JFrame {
         // create the JPanel
         gridPanel = new CandyJPanel(yCells[0], xCells[0], colors[0]);
         this.add(gridPanel);
+        thread1 = new Thread(gridPanel, "Thread 1");
+        thread1.start();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -71,7 +79,7 @@ public class CandyJFrame extends JFrame {
         this.setVisible(true);
     }
 
-    public static void main(String [] args) {
+    public static void main(String [] args) throws InvocationTargetException, InterruptedException {
         // set the look of the gui
 //        try {
 //            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -83,10 +91,10 @@ public class CandyJFrame extends JFrame {
 
         // start the program
 
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeAndWait(new Runnable(){
             @Override
             public void run() {
-                new com.felix.candy.CandyJFrame();
+                new CandyJFrame();
             }
         });
     }
