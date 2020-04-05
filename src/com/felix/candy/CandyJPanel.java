@@ -1,17 +1,12 @@
 package com.felix.candy;
 
+import javax.swing.*;
 import java.awt.*;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import javax.swing.*;
 
 public class CandyJPanel extends JPanel implements Runnable {
 
@@ -244,7 +239,6 @@ public class CandyJPanel extends JPanel implements Runnable {
             }
         }
     }
-
 
 
     private class PositionChange {
