@@ -7,7 +7,6 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Random;
 
-
 public class CandyJPanel extends JPanel implements Runnable {
 
     private int xSize, ySize;
