@@ -169,6 +169,8 @@ public class CandyJPanel extends JPanel implements Runnable {
                         if (horizontalRepeats > 3) xEnd += horizontalRepeats - 3;
                         xStart = (xEnd - (horizontalRepeats - 1));
 
+                        if(horizontalRepeats >= 5) setColorBomb(row, xStart); //TODO change xStart
+
                         return true;
                     }
                 }
@@ -226,12 +228,15 @@ public class CandyJPanel extends JPanel implements Runnable {
                         if (verticalRepeats > 3) yEnd += verticalRepeats - 3;
                         yStart = (yEnd - (verticalRepeats - 1));
 
+                        if(verticalRepeats >= 5) setColorBomb(yStart, col); //TODO change yStart
+
                         return true; // changes!
                     }
                 }
             }
             return false; // no changes
         }
+
 
         private void remCol() {
             int dif = yEnd - yStart;
@@ -245,6 +250,10 @@ public class CandyJPanel extends JPanel implements Runnable {
 
                 }
             }
+        }
+
+        private void setColorBomb (int y, int x){
+            G.specialGrid[y][x] = 5;
         }
 
         private void remAnimation(boolean row){
@@ -316,10 +325,21 @@ public class CandyJPanel extends JPanel implements Runnable {
             return xChange | yChange;
         }
 
-        private void change() {
+        private void change(){
+            changeGrid();
+            changeSpecial();
+        }
+
+        private void changeGrid() {
             int save = G.grid[y1][x1];
             G.grid[y1][x1] = G.grid[y2][x2];
             G.grid[y2][x2] = save;
+        }
+
+        private void changeSpecial(){
+            int save = G.specialGrid[y1][x1];
+            G.specialGrid[y1][x1] = G.specialGrid[y2][x2];
+            G.specialGrid[y2][x2] = save;
         }
 
         private void start() {
@@ -384,32 +404,41 @@ public class CandyJPanel extends JPanel implements Runnable {
 
     private class GameArrays {
         private int[][] grid;
+        private int[][] specialGrid;
         private int[] geomArray;
         private Color[] colorArray;
 
         private GameArrays(){
-            generateRandomArray();
+            fillGridArray();
+            fillSpecialArray();
             fillColorArray();
             fillGeomArray();
         }
 
-        private void generateRandomArray(){
+        private void fillGridArray(){
             grid = new int[YSIZE][XSIZE];
+            for(int yI = 0; yI < grid.length; yI++){
+                for(int xI = 0; xI < grid[yI].length; xI++){
+                    grid[yI][xI] = R.nextInt(NUMBERFORMS) + 1;
+                }
+            }
+        }
 
-            for(int yIterator = 0; yIterator < grid.length; yIterator++){
-                for(int xIterator = 0; xIterator < grid[yIterator].length; xIterator++){
-
-                    grid[yIterator][xIterator] = R.nextInt(NUMBERFORMS) + 1;
-
+        private void fillSpecialArray(){
+            specialGrid = new int[YSIZE][XSIZE];
+            for(int yI = 0; yI < grid.length; yI++){
+                for(int xI = 0; xI < grid[yI].length; xI++){
+                    specialGrid[yI][xI] = 0;
                 }
             }
         }
 
         private void fillGeomArray(){
-            geomArray = new int[NUMBERFORMS +1];
+            geomArray = new int[NUMBERFORMS+1];
 
             for(int i = 0; i < NUMBERFORMS; i++){
-                geomArray[i] = R.nextInt(5);
+                if (i < 5 ) geomArray[i] = i;
+                else geomArray[i] = R.nextInt(5);
             }
         }
 
@@ -482,16 +511,35 @@ public class CandyJPanel extends JPanel implements Runnable {
             for (GeomForm i : GFORMARRAYLIST) {
                 g2d.setPaint(i.COLOR);
 
-                if (G.geomArray[i.FORM] == 0){
+                if(i.FORM == -1){
+                    g2d.setPaint(Color.black);
+                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH*0.5, i.HEIGHT*0.5);
+                    g2d.fill(rect);
+
+                    g2d.setPaint(i.COLOR);
+                    rect = new Rectangle2D.Double(i.X+i.WIDTH*0.5, i.Y, i.WIDTH*0.5, i.HEIGHT*0.5);
+                    g2d.fill(rect);
+
+                    g2d.setPaint(i.COLOR);
+                    rect = new Rectangle2D.Double(i.X, i.Y+i.WIDTH*0.5, i.WIDTH*0.5, i.HEIGHT*0.5);
+                    g2d.fill(rect);
+
+                    g2d.setPaint(Color.black);
+                    rect = new Rectangle2D.Double(i.X+i.WIDTH*0.5, i.Y+i.WIDTH*0.5, i.WIDTH*0.5, i.HEIGHT*0.5);
+                    g2d.fill(rect);
+
+                } else if (G.geomArray[i.FORM] == 0){
                     Ellipse2D circle = new Ellipse2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
                     g2d.fill(circle);
                     g2d.setColor(Color.gray);
                     g2d.draw(circle);
+
                 } else if (G.geomArray[i.FORM] == 1){
                     Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
                     g2d.fill(rect);
                     g2d.setPaint(Color.gray);
                     g2d.draw(rect);
+
                 } else if (G.geomArray[i.FORM] == 2){
                     int[] xTriangle = new int[3];
                     xTriangle[0] = i.X+i.WIDTH/2;
@@ -507,6 +555,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                     g2d.fillPolygon(poly);
                     g2d.setPaint(Color.gray);
                     g2d.drawPolygon(poly);
+
                 } else if(G.geomArray[i.FORM] == 3){
                     int[] xPoly = new int[4];
                     xPoly[0] = i.X+i.WIDTH/2;
@@ -546,6 +595,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                     g2d.fillPolygon(poly);
                     g2d.setPaint(Color.gray);
                     g2d.drawPolygon(poly);
+
                 }
             }
         }
@@ -665,7 +715,6 @@ public class CandyJPanel extends JPanel implements Runnable {
 
             for (int y = 10; y < yMax; y += 30) {
                 for (int x = 10; x < xMax; x += 30) {
-
                     int no = G.grid[yCell][xCell];
                     Color col = G.colorArray[no];
 
@@ -692,6 +741,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                     }
                     boolean rRow = C.remRowAnimation & inY & inX;
 
+                    // remove Col Animation
                     inY = false;
                     for(int i = C.yEnd; i >= 0; i--){
                         if(i == yCell){
@@ -703,15 +753,14 @@ public class CandyJPanel extends JPanel implements Runnable {
                     inX = xCell == C.col;
                     boolean rCol = C.remColAnimation & inY & inX;
 
+
+                    if(G.specialGrid[yCell][xCell] == 5) no = -1;
+
                     if(firstClick)  fillClick(x, y, col, no);
                     else if(changePos) fillChangePos(x, y, forward, col, no);
                     else if(rRow) fillRem(x, y, col, no);
                     else if(rCol) fillRem(x, y, col, no);
-                    else {
-                        // without animation
-                        GFORMARRAYLIST.add(new GeomForm(x, y,20,20, col, no));
-                    }
-
+                    else GFORMARRAYLIST.add(new GeomForm(x, y,20,20, col, no));
                     xCell++;
                 }
                 xCell = 0;

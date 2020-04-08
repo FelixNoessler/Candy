@@ -19,13 +19,12 @@ public class CandyJFrame extends JFrame {
 
 
         // JTextField xSize
-        JTextField fieldXSize = new JTextField(String.valueOf(xCells[0]), 10);
-        fieldXSize.setPreferredSize(new Dimension(20,20));
+        JTextField fieldXSize = new JTextField(String.valueOf(xCells[0]), 4);
         this.add(fieldXSize);
 
 
         // JTextField ySize
-        JTextField fieldYSize = new JTextField(String.valueOf(yCells[0]), 10);
+        JTextField fieldYSize = new JTextField(String.valueOf(yCells[0]), 4);
         this.add(fieldYSize);
 
 
@@ -57,7 +56,6 @@ public class CandyJFrame extends JFrame {
         JSlider colSlider = new JSlider(2, 20, colors[0]);
         colSlider.setMinorTickSpacing(1);
         colSlider.setMajorTickSpacing(5);
-        colSlider.setBounds(120, yCells[0] * 30 + 30, 100, 50);
         colSlider.setPaintTicks(true);
         colSlider.addChangeListener((ChangeEvent event) -> colors[0] = colSlider.getValue());
         this.add(colSlider);
@@ -80,13 +78,13 @@ public class CandyJFrame extends JFrame {
 
     public static void main(String [] args) throws InvocationTargetException, InterruptedException {
         // set the look of the gui
-//        try {
-//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//        }
-//        catch (UnsupportedLookAndFeelException | ClassNotFoundException |
-//                InstantiationException | IllegalAccessException e ) {
-//           e.getStackTrace();
-//        }
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
+        catch (UnsupportedLookAndFeelException | ClassNotFoundException |
+                InstantiationException | IllegalAccessException e ) {
+           e.getStackTrace();
+        }
 
         // start the program
 
