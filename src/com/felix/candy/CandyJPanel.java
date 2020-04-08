@@ -4,38 +4,32 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class CandyJPanel extends JPanel implements Runnable {
 
-    private int xSize, ySize;
-    private int[][] grid;
+    private final int XSIZE, YSIZE;
+    private final int NUMBERFORMS;
 
-    private int points;
+    private final Random R = new Random();
 
-    // saves the rgb values of the colors in an array
-    private int numberOfColors;
-    private Color[] colorArray;
-
-    private Random r = new Random();
-
-    private Drawer d;
-    PositionChange p;
-    private GridChecker c;
-
-    // saves the clicks of the mouse
-    private ArrayList<Integer> xClicked = new ArrayList<>();
-    private ArrayList<Integer> yClicked = new ArrayList<>();
-
-
-    private boolean clickAnimation;
-
+    private final Drawer D;
+    private final PositionChange P;
+    private final GridChecker C;
+    private final GameArray G;
 
     public CandyJPanel(int ySize, int xSize, int numberOfColors) {
-        this.ySize = ySize;
-        this.xSize = xSize;
-        this.numberOfColors = numberOfColors;
+        this.YSIZE = ySize;
+        this.XSIZE = xSize;
+        this.NUMBERFORMS = numberOfColors;
+
+        G = new GameArray();
+        D = new Drawer();
+        C = new GridChecker();
+        P = new PositionChange();
 
         initPanel();
     }
@@ -45,7 +39,7 @@ public class CandyJPanel extends JPanel implements Runnable {
         // Label for the points (3 fields destroyed = 3 points)
         JLabel pointLabel = new JLabel("0");
         this.add(pointLabel);
-        this.points = 0;
+        int points = 0;
 
         // MouseListener - looks for the clicks of the mouse
         this.addMouseListener(new MouseListener(){
@@ -56,46 +50,34 @@ public class CandyJPanel extends JPanel implements Runnable {
                 //System.out.print("("+getX + "," + getY+") ");
 
                 // saves the position into the Arraylist
-                xClicked.add(getX);
-                yClicked.add(getY);
-
+                P.XCLICKED.add(getX);
+                P.YCLICKED.add(getY);
             }
             public void mousePressed(MouseEvent e){}
             public void mouseReleased(MouseEvent e){}
             public void mouseEntered(MouseEvent e){}
-            public void mouseExited(MouseEvent e){
-
-            }
+            public void mouseExited(MouseEvent e){}
         });
 
-        int widthPanel = xSize * 30+20, heightPanel = ySize * 30+40;
+        int widthPanel = XSIZE * 30+20, heightPanel = YSIZE * 30+40;
         this.setPreferredSize(new Dimension(widthPanel, heightPanel));
         this.setLayout(new FlowLayout(FlowLayout.RIGHT,20,heightPanel-30));
         this.setToolTipText("Click for changing the rectangles!");
-
-        c = new GridChecker();
-        d = new Drawer();
-        d.fillColorArray();
-
-        GameArray gArray = new GameArray();
-        gArray.generateRandomArray(ySize, xSize);
-
-        p = new PositionChange();
     }
 
     @Override
     public void run(){
 
-        c.remove();
+        C.remove();
 
         boolean isRunning = true;
 
         while(isRunning){
 
-            p.getClicks();
-            p.clickAnimation();
-            p.start();
-            p.animation();
+            P.getClicks();
+            P.clickAnimation();
+            P.start();
+            P.animation();
 
             repaint();
 
@@ -110,17 +92,28 @@ public class CandyJPanel extends JPanel implements Runnable {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        d.drawGrid(g);
+
+        D.clearFormList();
+        D.fillFormList();
+        D.drawForm(g);
     }
 
     private class GridChecker{
-        int xStart, xEnd;
-        int row, col;
-        int yStart, yEnd;
+        private int xStart, xEnd;
+        private int row, col;
+        private int yStart, yEnd;
+        private boolean isVertical;
 
         private boolean checkGrid(){
-            if(checkHorizontal()) return true;
-            return checkVertical();
+            if(checkHorizontal()) {
+                isVertical = false;
+                return true;
+            }
+            else if(checkVertical()){
+                isVertical = true;
+                return true;
+            }
+            return false;
         }
 
         private void remove(){
@@ -136,24 +129,23 @@ public class CandyJPanel extends JPanel implements Runnable {
             int lastNumber;
             int actualNumber;
 
-            for (int yI = 0; yI < grid.length; yI++) {
-                for (int xI = 0; xI < grid[yI].length; xI++) {
-                    actualNumber = grid[yI][xI];
+            for (int yI = 0; yI < G.grid.length; yI++) {
+                for (int xI = 0; xI < G.grid[yI].length; xI++) {
+                    actualNumber = G.grid[yI][xI];
 
-                    if (xI - 1 >= 0) lastNumber = grid[yI][xI - 1];
-                    else lastNumber = -1;
+                    if (xI - 1 >= 0) lastNumber = G.grid[yI][xI - 1];
+                    else lastNumber = -99;
 
                     if (actualNumber != lastNumber) horizontalRepeats = 1;
                     else horizontalRepeats++;
 
-
                     if (horizontalRepeats == 3) {
+
                         //check for more of the same color in the row:
-
                         for (int i = 1; true; i++) {
-                            if ((xI + i) > (grid[0].length - 1)) break;
+                            if ((xI + i) > (G.grid[0].length - 1)) break;
 
-                            int nextNumber = grid[yI][xI + i];
+                            int nextNumber = G.grid[yI][xI + i];
 
                             if (nextNumber == actualNumber) horizontalRepeats++;
                             else break;
@@ -175,10 +167,10 @@ public class CandyJPanel extends JPanel implements Runnable {
             for (int yToTop = row; yToTop >= 0; yToTop--) {
                 for (int xIterator = xStart; xIterator <= xEnd; xIterator++) {
                     if (yToTop == 0) {
-                        grid[yToTop][xIterator] = r.nextInt(numberOfColors) + 1;
+                        G.grid[yToTop][xIterator] = R.nextInt(NUMBERFORMS) + 1;
 
                     } else {
-                        grid[yToTop][xIterator] = grid[yToTop - 1][xIterator];
+                        G.grid[yToTop][xIterator] = G.grid[yToTop - 1][xIterator];
                     }
                 }
             }
@@ -190,23 +182,24 @@ public class CandyJPanel extends JPanel implements Runnable {
             int lastNumber;
             int actualNumber;
 
-            for(int xI = 0; xI < grid[0].length; xI++) {
-                for(int yI = 0; yI < grid.length; yI++) {
-                    actualNumber = grid[yI][xI];
+            for(int xI = 0; xI < G.grid[0].length; xI++) {
+                for(int yI = 0; yI < G.grid.length; yI++) {
+                    actualNumber = G.grid[yI][xI];
 
                     if (yI - 1 < 0) lastNumber = -1;
-                    else lastNumber = grid[yI-1][xI];
+                    else lastNumber = G.grid[yI-1][xI];
 
                     if (actualNumber == lastNumber) verticalRepeats++;
                     else verticalRepeats = 1;
 
+
                     if (verticalRepeats == 3) {
-                        //check for more of the same color in the row:
 
+                        //check for more of the same color in the col:
                         for(int i = 1; true; i++){
-                            if ((yI + i) > (grid.length - 1)) break;
+                            if ((yI + i) >= (G.grid.length)) break;
 
-                            int nextNumber = grid[yI+1][xI];
+                            int nextNumber = G.grid[yI+i][xI];
 
                             if (nextNumber == actualNumber) verticalRepeats++;
                             else break;
@@ -215,7 +208,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                         col = xI;
                         yEnd = yI;
                         if (verticalRepeats > 3) yEnd += verticalRepeats - 3;
-                        yStart = (xEnd - (verticalRepeats - 1));
+                        yStart = (yEnd - (verticalRepeats - 1));
 
                         return true; // changes!
                     }
@@ -229,10 +222,10 @@ public class CandyJPanel extends JPanel implements Runnable {
 
             for (int yToTop = yEnd; yToTop >= 0; yToTop--) {
                 if ((yToTop - dif) >= 0) {
-                    grid[yToTop][col] = grid[yToTop - dif][col];
+                    G.grid[yToTop][col] = G.grid[yToTop - dif][col];
 
                 } else {
-                    grid[yToTop][col] = r.nextInt(numberOfColors) + 1;
+                    G.grid[yToTop][col] = R.nextInt(NUMBERFORMS) + 1;
 
                 }
             }
@@ -243,41 +236,46 @@ public class CandyJPanel extends JPanel implements Runnable {
     private class PositionChange {
         private int x1, y1;
         private int x2, y2;
+        private boolean clickAnimation;
         private boolean animation;
         private boolean turned;
+        private boolean explode;
         private int counter;
-        private int[] direction;
+        private final int[] DIRECTION;
+        private final ArrayList<Integer> XCLICKED = new ArrayList<>();
+        private final ArrayList<Integer> YCLICKED = new ArrayList<>();
 
         private PositionChange(){
             animation = false;
             turned = false;
+            explode = false;
             counter = 0;
-            direction = new int[2];
+            DIRECTION = new int[2];
         }
 
         private void getClicks() {
-            if (xClicked.size() == 1 & yClicked.size() == 1) {
-                x1 = xClicked.get(0);
-                y1 = yClicked.get(0);
-            } else if (xClicked.size() == 2 & yClicked.size() == 2) {
-                x2 = xClicked.get(1);
-                y2 = yClicked.get(1);
+            if (XCLICKED.size() == 1 & YCLICKED.size() == 1) {
+                x1 = XCLICKED.get(0);
+                y1 = YCLICKED.get(0);
+            } else if (XCLICKED.size() == 2 & YCLICKED.size() == 2) {
+                x2 = XCLICKED.get(1);
+                y2 = YCLICKED.get(1);
 
                 if (!isNeighbour()) {
-                    x1 = xClicked.get(1);
-                    y1 = yClicked.get(1);
+                    x1 = XCLICKED.get(1);
+                    y1 = YCLICKED.get(1);
 
-                    xClicked.clear();
-                    yClicked.clear();
+                    XCLICKED.clear();
+                    YCLICKED.clear();
 
-                    xClicked.add(x1);
-                    yClicked.add(y2);
+                    XCLICKED.add(x1);
+                    YCLICKED.add(y2);
                 }
             }
         }
 
         private void clickAnimation() {
-            clickAnimation = xClicked.size() == 1 & yClicked.size() == 1;
+            clickAnimation = XCLICKED.size() == 1 & YCLICKED.size() == 1;
         }
 
         private boolean isNeighbour() {
@@ -292,30 +290,28 @@ public class CandyJPanel extends JPanel implements Runnable {
         }
 
         private void change() {
-            int save = grid[y1][x1];
-            grid[y1][x1] = grid[y2][x2];
-            grid[y2][x2] = save;
-
+            int save = G.grid[y1][x1];
+            G.grid[y1][x1] = G.grid[y2][x2];
+            G.grid[y2][x2] = save;
         }
 
         private void start() {
-            if (xClicked.size() == 2 & yClicked.size() == 2) {
+            if (XCLICKED.size() == 2 & YCLICKED.size() == 2) {
 
                 change();
                 animation = true;
 
                 //toRight
-                if (x2 > x1) direction[0] = 1;
+                if (x2 > x1) DIRECTION[0] = 1;
                 //toLeft
-                else if (x2 < x1) direction[0] = 2;
+                else if (x2 < x1) DIRECTION[0] = 2;
                 //toTop
-                else if (y2 < y1) direction[0] = 3;
+                else if (y2 < y1) DIRECTION[0] = 3;
                 //toBottom
-                else if (y2 > y1) direction[0] = 4;
+                else if (y2 > y1) DIRECTION[0] = 4;
 
-                xClicked.clear();
-                yClicked.clear();
-
+                XCLICKED.clear();
+                YCLICKED.clear();
             }
         }
 
@@ -326,10 +322,9 @@ public class CandyJPanel extends JPanel implements Runnable {
                 } else if (counter == 30) {
                     counter = 0;
 
-                    boolean explode = c.checkGrid();
+                    explode = C.checkGrid();
                     if(explode) {
                         animation = false;
-                        c.remove();
                     }
                     else{ //change back!
                         if(turned){
@@ -339,18 +334,18 @@ public class CandyJPanel extends JPanel implements Runnable {
                             turned = true;
                             change();
 
-                            switch(direction[0]){
+                            switch(DIRECTION[0]){
                                 case 1:
-                                    direction[1] = 2;
+                                    DIRECTION[1] = 2;
                                     break;
                                 case 2:
-                                    direction[1] = 1;
+                                    DIRECTION[1] = 1;
                                     break;
                                 case 3:
-                                    direction[1] = 4;
+                                    DIRECTION[1] = 4;
                                     break;
                                 case 4:
-                                    direction[1] = 3;
+                                    DIRECTION[1] = 3;
                                     break;
                             }
                         }
@@ -361,13 +356,19 @@ public class CandyJPanel extends JPanel implements Runnable {
     }
 
     private class GameArray{
-        private void generateRandomArray(int ySize, int xSize){
-            grid = new int[ySize][xSize];
+        private int[][] grid;
+
+        private GameArray(){
+            generateRandomArray();
+        }
+
+        private void generateRandomArray(){
+            grid = new int[YSIZE][XSIZE];
 
             for(int yIterator = 0; yIterator < grid.length; yIterator++){
                 for(int xIterator = 0; xIterator < grid[yIterator].length; xIterator++){
 
-                    grid[yIterator][xIterator] = r.nextInt(numberOfColors) + 1;
+                    grid[yIterator][xIterator] = R.nextInt(NUMBERFORMS) + 1;
 
                 }
             }
@@ -375,13 +376,75 @@ public class CandyJPanel extends JPanel implements Runnable {
 
     }
 
+    private static class GeomForm {
+        final int X;
+        final int Y;
+        final int WIDTH;
+        final int HEIGHT;
+        final Color COLOR;
+        final int FORM;
+
+        private GeomForm(int x, int y, int width, int height, Color color, int form) {
+            this.X = x;
+            this.Y = y;
+            this.WIDTH = width;
+            this.HEIGHT = height;
+            this.COLOR = color;
+            this.FORM = form;
+        }
+    }
+
     private class Drawer {
 
+        private final ArrayList<GeomForm> GFORMARRAYLIST = new ArrayList<>();
+        private int explodeCounter = 0;
+        private int[] geomArray;
+        private Color[] colorArray;
+
+
+        private Drawer(){
+            fillColorArray();
+            fillGeomArray();
+        }
+
+        private void clearFormList(){
+            GFORMARRAYLIST.clear();
+        }
+
+        private void drawForm(Graphics g){
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            for (GeomForm i : GFORMARRAYLIST) {
+                g2d.setPaint(i.COLOR);
+
+                if (geomArray[i.FORM] == 0){
+                    Ellipse2D circle = new Ellipse2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
+                    g2d.fill(circle);
+                    g2d.setColor(Color.gray);
+                    g2d.draw(circle);
+                } else if (geomArray[i.FORM] == 1){
+                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
+                    g2d.fill(rect);
+                    g2d.setPaint(Color.gray);
+                    g2d.draw(rect);
+                }
+            }
+        }
+
+        private void fillGeomArray(){
+            geomArray = new int[NUMBERFORMS +1];
+
+            for(int i = 0; i < NUMBERFORMS; i++){
+                geomArray[i] = R.nextInt(2);
+            }
+        }
+
         private void fillColorArray() {
-            if (numberOfColors < 6) {
+            if (NUMBERFORMS < 6) {
                 colorArray = new Color[7];
             } else {
-                colorArray = new Color[numberOfColors + 1];
+                colorArray = new Color[NUMBERFORMS + 1];
             }
 
             colorArray[0] = new Color(255, 255, 255);
@@ -392,61 +455,85 @@ public class CandyJPanel extends JPanel implements Runnable {
             colorArray[5] = new Color(255, 137, 61);
             colorArray[6] = new Color(25, 176, 130);
 
-            for (int i = 7; i < numberOfColors; i++) {
-                float red = r.nextFloat();
-                float green = (r.nextFloat() / 5f + 0.8f * i / numberOfColors);
-                float blue = (r.nextFloat() / 5f + 0.8f * i / numberOfColors);
+            for (int i = 7; i < NUMBERFORMS; i++) {
+                float red = R.nextFloat();
+                float green = (R.nextFloat() / 5f + 0.8f * i / NUMBERFORMS);
+                float blue = (R.nextFloat() / 5f + 0.8f * i / NUMBERFORMS);
 
                 colorArray[i] = new Color(red, green, blue);
             }
         }
 
-        private void drawGrid(Graphics g) {
+        private void explode(){
+            if(explodeCounter == 10) {
+                explodeCounter = 0;
+                P.explode = false;
+                C.remove();
+            }else{
+                explodeCounter++;
 
-            Graphics2D g2d = (Graphics2D) g;
+                if(C.isVertical){
+                    for(int i = C.yStart; i <= C.yEnd; i++){
+                        GFORMARRAYLIST.add(new GeomForm(C.col*30+10,
+                                i*30+10,
+                                20,
+                                20,
+                                Color.black,
+                                G.grid[C.yStart][C.col]));
+                    }
+                }else{
+                    for(int i = C.xStart; i <= C.xEnd; i++){
+                        GFORMARRAYLIST.add(new GeomForm(i*30+10,
+                                C.row*30+10,
+                                20,
+                                20,
+                                Color.black,
+                                G.grid[C.row][C.xStart]));
+                    }
+                }
+            }
+        }
 
+        private void fillFormList() {
             int xCell = 0, yCell = 0;
 
-            int yMax = 30 * ySize + 10;
-            int xMax = 30 * xSize + 10;
+            int yMax = 30 * YSIZE + 10;
+            int xMax = 30 * XSIZE + 10;
 
             int xAni = 0, yAni = 0;
-            Color aniCol = Color.WHITE;
+            Color aniCol = Color.yellow;
+            int aniNo = -1;
 
             for (int y = 10; y < yMax; y += 30) {
                 for (int x = 10; x < xMax; x += 30) {
 
-                    int no = grid[yCell][xCell];
-                    //int special = specialGrid[yCell][xCell];
+                    int no = G.grid[yCell][xCell];
 
+                    boolean firstClick = P.y1 == yCell & P.x1 == xCell & P.clickAnimation;
 
-                    boolean firstClick = p.y1 == yCell & p.x1 == xCell & clickAnimation;
+                    boolean forward = P.y2 == yCell & P.x2 == xCell & !P.turned;
+                    boolean back = P.y1 == yCell & P.x1 == xCell & P.turned;
 
-                    boolean forward = p.y2 == yCell & p.x2 == xCell & !p.turned;
-                    boolean back = p.y1 == yCell & p.x1 == xCell & p.turned;
-
-                    boolean changePos = (forward | back) & p.animation;
+                    boolean changePos = (forward | back) & P.animation;
 
                     if (firstClick | changePos) {
                         int move = 0;
 
-                        if (changePos) move = p.counter;
+                        if (changePos) move = P.counter;
 
                         aniCol = colorArray[no];
+                        aniNo = no;
 
                         if (firstClick) {
                             xAni = x + 2;
                             yAni = y + 2;
 
-                            g2d.setColor(aniCol);
-                            g2d.fillRect(xAni, yAni, 21, 21);
-                            g2d.setColor(Color.GRAY);
-                            g2d.drawRect(xAni - 1, yAni - 1, 21, 21);
+                            GFORMARRAYLIST.add(new GeomForm(xAni, yAni, 16,16, aniCol, no));
 
-                        } else if (p.animation) {
+                        } else { // p.animation
                             int di = 0;
-                            if(forward) di = p.direction[0];
-                            else if (back) di = p.direction[1];
+                            if(forward) di = P.DIRECTION[0];
+                            else if (back) di = P.DIRECTION[1];
                             else System.out.println("error");
 
                             switch (di) {
@@ -471,21 +558,13 @@ public class CandyJPanel extends JPanel implements Runnable {
 
 
                         if (changePos) {
-                            g2d.setColor(aniCol);
-                            g2d.fillRect(xAni, yAni, 25, 25);
-                            g2d.setColor(Color.GRAY);
-                            g2d.drawRect(xAni - 1, yAni - 1, 25, 25);
+                            GFORMARRAYLIST.add(new GeomForm(xAni, yAni, 20,20, aniCol, no));
                         }
                     }
 
                     else {
-                        // fill rectangle
-                        g2d.setColor(colorArray[no]);
-                        g2d.fillRect(x, y, 25, 25);
-
-                        // boundaries of the rectangle
-                        g2d.setColor(Color.GRAY);
-                        g2d.drawRect(x - 1, y - 1, 25, 25);
+                        // without animation
+                        GFORMARRAYLIST.add(new GeomForm(x, y,20,20, colorArray[no], no));
                     }
 
                     xCell++;
@@ -494,14 +573,11 @@ public class CandyJPanel extends JPanel implements Runnable {
                 yCell++;
             }
 
-            if (p.animation) {
-                g2d.setColor(aniCol);
-                g2d.fillRect(xAni, yAni, 25, 25);
-                g2d.setColor(Color.GRAY);
-                g2d.drawRect(xAni - 1, yAni - 1, 25, 25);
+            if (P.animation) {
+                GFORMARRAYLIST.add(new GeomForm(xAni, yAni, 20,20, aniCol, aniNo));
             }
+
+            if(P.explode) explode();
         }
-
     }
-
 }

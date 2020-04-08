@@ -43,7 +43,6 @@ public class CandyJFrame extends JFrame {
             this.remove(gridPanel);
             gridPanel = new CandyJPanel(yCells[0], xCells[0], colors[0]);
             this.add(gridPanel);
-            //TODO should we stop the threat??
             thread1 = new Thread(gridPanel, "new Thread");
             thread1.start();
 
