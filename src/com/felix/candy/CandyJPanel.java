@@ -19,14 +19,14 @@ public class CandyJPanel extends JPanel implements Runnable {
     private final Drawer D;
     private final PositionChange P;
     private final GridChecker C;
-    private final GameArray G;
+    private final GameArrays G;
 
     public CandyJPanel(int ySize, int xSize, int numberOfColors) {
         this.YSIZE = ySize;
         this.XSIZE = xSize;
         this.NUMBERFORMS = numberOfColors;
 
-        G = new GameArray();
+        G = new GameArrays();
         D = new Drawer();
         C = new GridChecker();
         P = new PositionChange();
@@ -37,9 +37,8 @@ public class CandyJPanel extends JPanel implements Runnable {
     private void initPanel(){
 
         // Label for the points (3 fields destroyed = 3 points)
-        JLabel pointLabel = new JLabel("0");
-        this.add(pointLabel);
-        int points = 0;
+        //JLabel pointLabel = new JLabel("0");
+        //this.add(pointLabel);
 
         // MouseListener - looks for the clicks of the mouse
         this.addMouseListener(new MouseListener(){
@@ -72,6 +71,9 @@ public class CandyJPanel extends JPanel implements Runnable {
 
         boolean isRunning = true;
 
+        //System.currentTimeMillis();
+
+
         while(isRunning){
 
             P.getClicks();
@@ -103,6 +105,17 @@ public class CandyJPanel extends JPanel implements Runnable {
         private int row, col;
         private int yStart, yEnd;
         private boolean isVertical;
+
+        private boolean remColAnimation;
+
+        private boolean remRowAnimation;
+        private int rowMove;
+
+        private GridChecker(){
+            remRowAnimation = false;
+            remColAnimation = false;
+            rowMove = -30;
+        }
 
         private boolean checkGrid(){
             if(checkHorizontal()) {
@@ -165,16 +178,19 @@ public class CandyJPanel extends JPanel implements Runnable {
 
         private void remRow() {
             for (int yToTop = row; yToTop >= 0; yToTop--) {
-                for (int xIterator = xStart; xIterator <= xEnd; xIterator++) {
+                for (int xI = xStart; xI <= xEnd; xI++) {
                     if (yToTop == 0) {
-                        G.grid[yToTop][xIterator] = R.nextInt(NUMBERFORMS) + 1;
+                        G.grid[yToTop][xI] = R.nextInt(NUMBERFORMS) + 1;
 
                     } else {
-                        G.grid[yToTop][xIterator] = G.grid[yToTop - 1][xIterator];
+                        G.grid[yToTop][xI] = G.grid[yToTop - 1][xI];
                     }
                 }
             }
         }
+
+
+
 
 
         private boolean checkVertical(){
@@ -229,6 +245,17 @@ public class CandyJPanel extends JPanel implements Runnable {
 
                 }
             }
+        }
+
+        private void remAnimation(boolean row){
+            if(rowMove == 0){
+                if(row) remRowAnimation = false;
+                else remColAnimation = false;
+                return;
+            }
+
+            if(row) rowMove += 5;
+            else rowMove += 10;
         }
     }
 
@@ -355,11 +382,15 @@ public class CandyJPanel extends JPanel implements Runnable {
         }
     }
 
-    private class GameArray{
+    private class GameArrays {
         private int[][] grid;
+        private int[] geomArray;
+        private Color[] colorArray;
 
-        private GameArray(){
+        private GameArrays(){
             generateRandomArray();
+            fillColorArray();
+            fillGeomArray();
         }
 
         private void generateRandomArray(){
@@ -374,69 +405,11 @@ public class CandyJPanel extends JPanel implements Runnable {
             }
         }
 
-    }
-
-    private static class GeomForm {
-        final int X;
-        final int Y;
-        final int WIDTH;
-        final int HEIGHT;
-        final Color COLOR;
-        final int FORM;
-
-        private GeomForm(int x, int y, int width, int height, Color color, int form) {
-            this.X = x;
-            this.Y = y;
-            this.WIDTH = width;
-            this.HEIGHT = height;
-            this.COLOR = color;
-            this.FORM = form;
-        }
-    }
-
-    private class Drawer {
-
-        private final ArrayList<GeomForm> GFORMARRAYLIST = new ArrayList<>();
-        private int explodeCounter = 0;
-        private int[] geomArray;
-        private Color[] colorArray;
-
-
-        private Drawer(){
-            fillColorArray();
-            fillGeomArray();
-        }
-
-        private void clearFormList(){
-            GFORMARRAYLIST.clear();
-        }
-
-        private void drawForm(Graphics g){
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            for (GeomForm i : GFORMARRAYLIST) {
-                g2d.setPaint(i.COLOR);
-
-                if (geomArray[i.FORM] == 0){
-                    Ellipse2D circle = new Ellipse2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
-                    g2d.fill(circle);
-                    g2d.setColor(Color.gray);
-                    g2d.draw(circle);
-                } else if (geomArray[i.FORM] == 1){
-                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
-                    g2d.fill(rect);
-                    g2d.setPaint(Color.gray);
-                    g2d.draw(rect);
-                }
-            }
-        }
-
         private void fillGeomArray(){
             geomArray = new int[NUMBERFORMS +1];
 
             for(int i = 0; i < NUMBERFORMS; i++){
-                geomArray[i] = R.nextInt(2);
+                geomArray[i] = R.nextInt(5);
             }
         }
 
@@ -464,11 +437,160 @@ public class CandyJPanel extends JPanel implements Runnable {
             }
         }
 
+    }
+
+    private static class GeomForm {
+        final int X;
+        final int Y;
+        final int WIDTH;
+        final int HEIGHT;
+        final Color COLOR;
+        final int FORM;
+
+        private GeomForm(int x, int y, int width, int height, Color color, int form) {
+            this.X = x;
+            this.Y = y;
+            this.WIDTH = width;
+            this.HEIGHT = height;
+            this.COLOR = color;
+            this.FORM = form;
+        }
+    }
+
+    private class Drawer {
+
+        private final ArrayList<GeomForm> GFORMARRAYLIST = new ArrayList<>();
+        private int explodeCounter;
+        private int removeCounter;
+        private boolean removeAni;
+
+
+        private Drawer(){
+            explodeCounter = 0;
+            removeCounter = 0;
+            removeAni = false;
+        }
+
+        private void clearFormList(){
+            GFORMARRAYLIST.clear();
+        }
+
+        private void drawForm(Graphics g){
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            for (GeomForm i : GFORMARRAYLIST) {
+                g2d.setPaint(i.COLOR);
+
+                if (G.geomArray[i.FORM] == 0){
+                    Ellipse2D circle = new Ellipse2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
+                    g2d.fill(circle);
+                    g2d.setColor(Color.gray);
+                    g2d.draw(circle);
+                } else if (G.geomArray[i.FORM] == 1){
+                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
+                    g2d.fill(rect);
+                    g2d.setPaint(Color.gray);
+                    g2d.draw(rect);
+                } else if (G.geomArray[i.FORM] == 2){
+                    int[] xTriangle = new int[3];
+                    xTriangle[0] = i.X+i.WIDTH/2;
+                    xTriangle[1] = i.X+i.WIDTH;
+                    xTriangle[2] = i.X;
+
+                    int[] yTriangle = new int[3];
+                    yTriangle[0] = i.Y;
+                    yTriangle[1] = i.Y+i.HEIGHT;
+                    yTriangle[2] = i.Y+i.HEIGHT;
+
+                    Polygon poly = new Polygon(xTriangle, yTriangle, 3);
+                    g2d.fillPolygon(poly);
+                    g2d.setPaint(Color.gray);
+                    g2d.drawPolygon(poly);
+                } else if(G.geomArray[i.FORM] == 3){
+                    int[] xPoly = new int[4];
+                    xPoly[0] = i.X+i.WIDTH/2;
+                    xPoly[1] = i.X+i.WIDTH;
+                    xPoly[2] = i.X+i.WIDTH/2;
+                    xPoly[3] = i.X;
+
+                    int[] yPoly = new int[4];
+                    yPoly[0] = i.Y;
+                    yPoly[1] = i.Y+i.HEIGHT/2;
+                    yPoly[2] = i.Y+i.HEIGHT;
+                    yPoly[3] = i.Y+i.HEIGHT/2;
+
+                    Polygon poly = new Polygon(xPoly, yPoly, 4);
+                    g2d.fillPolygon(poly);
+                    g2d.setPaint(Color.gray);
+                    g2d.drawPolygon(poly);
+
+                }else if(G.geomArray[i.FORM] == 4){
+                    int[] xPoly = new int[6];
+                    xPoly[0] = i.X+i.WIDTH/4;
+                    xPoly[1] = i.X+i.WIDTH*3/4;
+                    xPoly[2] = i.X+i.WIDTH;
+                    xPoly[3] = i.X+i.WIDTH;
+                    xPoly[4] = i.X;
+                    xPoly[5] = i.X;
+
+                    int[] yPoly = new int[6];
+                    yPoly[0] = i.Y;
+                    yPoly[1] = i.Y;
+                    yPoly[2] = i.Y+i.HEIGHT/4;
+                    yPoly[3] = i.Y+i.HEIGHT*3/4;
+                    yPoly[4] = i.Y+i.HEIGHT*3/4;
+                    yPoly[5] = i.Y+i.HEIGHT/4;
+
+                    Polygon poly = new Polygon(xPoly, yPoly, 6);
+                    g2d.fillPolygon(poly);
+                    g2d.setPaint(Color.gray);
+                    g2d.drawPolygon(poly);
+                }
+            }
+        }
+
+        private void removeAnimation(){
+            if(C.remRowAnimation){
+                C.remAnimation(true);
+                return;
+            }else if(C.remColAnimation){
+                C.remAnimation(false);
+                return;
+            }
+
+
+            if(removeCounter == 10 & !C.checkGrid()){
+                removeAni = false;
+                removeCounter = 0;
+                return;
+            } else if(removeCounter == 10){
+                removeCounter = 0;
+                return;
+            }
+            if(removeCounter == 0) {
+                if (C.checkHorizontal()) {
+                    C.remRow();
+                    C.rowMove = -30;
+                    C.remRowAnimation = true;
+                    return;
+                }
+                else if (C.checkVertical()) {
+                    C.remCol();
+                    C.rowMove = -30 * (C.yEnd - C.yStart+1) ;
+                    C.remColAnimation = true;
+                    return;
+                }
+            }
+            removeCounter++;
+        }
+
+
         private void explode(){
             if(explodeCounter == 10) {
                 explodeCounter = 0;
                 P.explode = false;
-                C.remove();
+                removeAni = true;
             }else{
                 explodeCounter++;
 
@@ -494,77 +616,100 @@ public class CandyJPanel extends JPanel implements Runnable {
             }
         }
 
+        private void fillRem(int x, int y, Color col, int no){
+            y = y + C.rowMove;
+            GFORMARRAYLIST.add(new GeomForm(x, y, 20,20, col, no));
+        }
+
+        private void fillClick(int x, int y, Color col, int no){
+            x +=  2;
+            y += 2;
+            GFORMARRAYLIST.add(new GeomForm(x, y, 16,16, col, no));
+        }
+
+        private void fillChangePos(int x, int y, boolean forward, Color col, int no){
+            int di;
+            if(forward) di = P.DIRECTION[0];
+            else di = P.DIRECTION[1];
+
+            int move = P.counter;
+
+            switch (di) {
+                case 1: //right
+                    x = x - 30 + move;
+                    //y = y;
+                    break;
+                case 2: //left
+                    x = x + 30 - move;
+                    //y = y;
+                    break;
+                case 3: //top
+                    //x = x;
+                    y = y + 30 - move;
+                    break;
+                case 4: //bottom
+                    //x = x;
+                    y = y - 30 + move;
+                    break;
+            }
+
+            GFORMARRAYLIST.add(new GeomForm(x, y, 20,20, col, no));
+
+        }
+
         private void fillFormList() {
             int xCell = 0, yCell = 0;
 
             int yMax = 30 * YSIZE + 10;
             int xMax = 30 * XSIZE + 10;
 
-            int xAni = 0, yAni = 0;
-            Color aniCol = Color.yellow;
-            int aniNo = -1;
-
             for (int y = 10; y < yMax; y += 30) {
                 for (int x = 10; x < xMax; x += 30) {
 
                     int no = G.grid[yCell][xCell];
+                    Color col = G.colorArray[no];
 
                     boolean firstClick = P.y1 == yCell & P.x1 == xCell & P.clickAnimation;
-
                     boolean forward = P.y2 == yCell & P.x2 == xCell & !P.turned;
                     boolean back = P.y1 == yCell & P.x1 == xCell & P.turned;
-
                     boolean changePos = (forward | back) & P.animation;
 
-                    if (firstClick | changePos) {
-                        int move = 0;
 
-                        if (changePos) move = P.counter;
-
-                        aniCol = colorArray[no];
-                        aniNo = no;
-
-                        if (firstClick) {
-                            xAni = x + 2;
-                            yAni = y + 2;
-
-                            GFORMARRAYLIST.add(new GeomForm(xAni, yAni, 16,16, aniCol, no));
-
-                        } else { // p.animation
-                            int di = 0;
-                            if(forward) di = P.DIRECTION[0];
-                            else if (back) di = P.DIRECTION[1];
-                            else System.out.println("error");
-
-                            switch (di) {
-                                case 1: //right
-                                    xAni = x - 30 + move;
-                                    yAni = y;
-                                    break;
-                                case 2: //left
-                                    xAni = x + 30 - move;
-                                    yAni = y;
-                                    break;
-                                case 3: //top
-                                    xAni = x;
-                                    yAni = y + 30 - move;
-                                    break;
-                                case 4: //bottom
-                                    xAni = x;
-                                    yAni = y - 30 + move;
-                                    break;
-                            }
+                    // remove Row Animation
+                    boolean inX = false;
+                    for(int i = C.xStart; i <= C.xEnd; i++){
+                        if(xCell == i) {
+                            inX = true;
+                            break;
                         }
+                    }
+                    boolean inY = false;
+                    for(int i = C.row; i >= 0; i--){
+                        if(yCell == i) {
+                            inY = true;
+                            break;
+                        }
+                    }
+                    boolean rRow = C.remRowAnimation & inY & inX;
 
-
-                        if (changePos) {
-                            GFORMARRAYLIST.add(new GeomForm(xAni, yAni, 20,20, aniCol, no));
+                    inY = false;
+                    for(int i = C.yEnd; i >= 0; i--){
+                        if(i == yCell){
+                            inY = true;
+                            break;
                         }
                     }
 
+                    inX = xCell == C.col;
+                    boolean rCol = C.remColAnimation & inY & inX;
+
+                    if(firstClick)  fillClick(x, y, col, no);
+                    else if(changePos) fillChangePos(x, y, forward, col, no);
+                    else if(rRow) fillRem(x, y, col, no);
+                    else if(rCol) fillRem(x, y, col, no);
                     else {
                         // without animation
-                        GFORMARRAYLIST.add(new GeomForm(x, y,20,20, colorArray[no], no));
+                        GFORMARRAYLIST.add(new GeomForm(x, y,20,20, col, no));
                     }
 
                     xCell++;
@@ -573,11 +718,8 @@ public class CandyJPanel extends JPanel implements Runnable {
                 yCell++;
             }
 
-            if (P.animation) {
-                GFORMARRAYLIST.add(new GeomForm(xAni, yAni, 20,20, aniCol, aniNo));
-            }
-
             if(P.explode) explode();
+            else if(removeAni) removeAnimation();
         }
     }
 }
