@@ -69,12 +69,12 @@ public class CandyJPanel extends JPanel implements Runnable {
 
         C.remove();
 
-        boolean isRunning = true;
+        //boolean isRunning = true;
 
         //System.currentTimeMillis();
 
 
-        while(isRunning){
+        while (true) {
 
             P.getClicks();
             P.clickAnimation();
@@ -83,7 +83,7 @@ public class CandyJPanel extends JPanel implements Runnable {
 
             repaint();
 
-            try{
+            try {
                 Thread.sleep(30);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -100,44 +100,46 @@ public class CandyJPanel extends JPanel implements Runnable {
         D.drawForm(g);
     }
 
-    private class GridChecker{
+    private class GridChecker {
         private int xStart, xEnd;
-        private int row, col;
         private int yStart, yEnd;
+        private int row, col;
         private boolean isVertical;
 
         private boolean remColAnimation;
-
         private boolean remRowAnimation;
         private int rowMove;
 
-        private GridChecker(){
+        private GridChecker() {
             remRowAnimation = false;
             remColAnimation = false;
-            rowMove = -30;
         }
 
         private boolean checkGrid(){
+            // wrapper for the two functions
             if(checkHorizontal()) {
                 isVertical = false;
-                return true;
-            }
-            else if(checkVertical()){
+                return true; // three or more ine one col
+            } else if (checkVertical()) {
                 isVertical = true;
-                return true;
+                return true; // three or more in one row
             }
-            return false;
+            return false; // could not find three or more in one row/col
         }
 
-        private void remove(){
-            while(checkGrid()){
-                if(checkHorizontal()) remRow();
-                if(checkVertical()) remCol();
+        private void remove() {
+            // remove without animation (on startup)
+            while (checkGrid()) {
+                if (checkHorizontal()) remRow();
+                if (checkVertical()) remCol();
             }
         }
 
-
-        private boolean checkHorizontal(){
+        private boolean checkHorizontal() {
+            // goes through the grid and finds places where 3 or more
+            // of the same form/color are grouped together
+            // changes the variables row, xStart, xEnd
+            // set colorBombs for five in one row
             int horizontalRepeats = 1;
             int lastNumber;
             int actualNumber;
@@ -169,43 +171,53 @@ public class CandyJPanel extends JPanel implements Runnable {
                         if (horizontalRepeats > 3) xEnd += horizontalRepeats - 3;
                         xStart = (xEnd - (horizontalRepeats - 1));
 
-                        if(horizontalRepeats >= 5) setColorBomb(row, xStart); //TODO change xStart
+                        if (horizontalRepeats >= 5) setColorBomb(row, clickInX(xStart, xEnd));
 
-                        return true;
+                        return true; // found 3 or more of the same form/color
                     }
                 }
             }
-            return false;
+            return false; // could not find 3 or more of the same form/color
+        }
+
+        private int clickInX(int x1, int x2) {
+            for (int i = x1; i <= x2; i++) {
+                if (i == P.x1) return P.x1;
+                else if (i == P.x2) return P.x2;
+            }
+            // no click in range found!
+            return x1;
         }
 
         private void remRow() {
+            // changes the grid, removes three or more in one row
             for (int yToTop = row; yToTop >= 0; yToTop--) {
                 for (int xI = xStart; xI <= xEnd; xI++) {
-                    if (yToTop == 0) {
-                        G.grid[yToTop][xI] = R.nextInt(NUMBERFORMS) + 1;
-
-                    } else {
+                    if (yToTop > 0)
                         G.grid[yToTop][xI] = G.grid[yToTop - 1][xI];
-                    }
+                    if (yToTop == 0)
+                        G.grid[yToTop][xI] = R.nextInt(NUMBERFORMS) + 1;
                 }
             }
         }
 
 
+        private boolean checkVertical() {
+            // goes through the grid and finds places where 3 or more
+            // of the same form/color are grouped together in one column
+            // changes the variables col, yStart, yEnd
+            // set colorBombs for five in one column
 
-
-
-        private boolean checkVertical(){
             int verticalRepeats = 1;
             int lastNumber;
             int actualNumber;
 
-            for(int xI = 0; xI < G.grid[0].length; xI++) {
-                for(int yI = 0; yI < G.grid.length; yI++) {
+            for (int xI = 0; xI < G.grid[0].length; xI++) {
+                for (int yI = 0; yI < G.grid.length; yI++) {
                     actualNumber = G.grid[yI][xI];
 
                     if (yI - 1 < 0) lastNumber = -1;
-                    else lastNumber = G.grid[yI-1][xI];
+                    else lastNumber = G.grid[yI - 1][xI];
 
                     if (actualNumber == lastNumber) verticalRepeats++;
                     else verticalRepeats = 1;
@@ -228,7 +240,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                         if (verticalRepeats > 3) yEnd += verticalRepeats - 3;
                         yStart = (yEnd - (verticalRepeats - 1));
 
-                        if(verticalRepeats >= 5) setColorBomb(yStart, col); //TODO change yStart
+                        if (verticalRepeats >= 5) setColorBomb(clickInY(yStart, yEnd), col);
 
                         return true; // changes!
                     }
@@ -238,17 +250,24 @@ public class CandyJPanel extends JPanel implements Runnable {
         }
 
 
+        private int clickInY(int y1, int y2) {
+            for (int i = y1; i <= y2; i++) {
+                if (i == P.y1) return P.y1;
+                else if (i == P.y2) return P.y2;
+            }
+            // no click in range found!
+            return y1;
+        }
+
+
         private void remCol() {
+            // removes three or more forms in one column
             int dif = yEnd - yStart;
-
             for (int yToTop = yEnd; yToTop >= 0; yToTop--) {
-                if ((yToTop - dif) >= 0) {
+                if ((yToTop - dif) >= 0)
                     G.grid[yToTop][col] = G.grid[yToTop - dif][col];
-
-                } else {
+                else
                     G.grid[yToTop][col] = R.nextInt(NUMBERFORMS) + 1;
-
-                }
             }
         }
 
@@ -600,112 +619,6 @@ public class CandyJPanel extends JPanel implements Runnable {
             }
         }
 
-        private void removeAnimation(){
-            if(C.remRowAnimation){
-                C.remAnimation(true);
-                return;
-            }else if(C.remColAnimation){
-                C.remAnimation(false);
-                return;
-            }
-
-
-            if(removeCounter == 10 & !C.checkGrid()){
-                removeAni = false;
-                removeCounter = 0;
-                return;
-            } else if(removeCounter == 10){
-                removeCounter = 0;
-                return;
-            }
-            if(removeCounter == 0) {
-                if (C.checkHorizontal()) {
-                    C.remRow();
-                    C.rowMove = -30;
-                    C.remRowAnimation = true;
-                    return;
-                }
-                else if (C.checkVertical()) {
-                    C.remCol();
-                    C.rowMove = -30 * (C.yEnd - C.yStart+1) ;
-                    C.remColAnimation = true;
-                    return;
-                }
-            }
-            removeCounter++;
-        }
-
-
-        private void explode(){
-            if(explodeCounter == 10) {
-                explodeCounter = 0;
-                P.explode = false;
-                removeAni = true;
-            }else{
-                explodeCounter++;
-
-                if(C.isVertical){
-                    for(int i = C.yStart; i <= C.yEnd; i++){
-                        GFORMARRAYLIST.add(new GeomForm(C.col*30+10,
-                                i*30+10,
-                                20,
-                                20,
-                                Color.black,
-                                G.grid[C.yStart][C.col]));
-                    }
-                }else{
-                    for(int i = C.xStart; i <= C.xEnd; i++){
-                        GFORMARRAYLIST.add(new GeomForm(i*30+10,
-                                C.row*30+10,
-                                20,
-                                20,
-                                Color.black,
-                                G.grid[C.row][C.xStart]));
-                    }
-                }
-            }
-        }
-
-        private void fillRem(int x, int y, Color col, int no){
-            y = y + C.rowMove;
-            GFORMARRAYLIST.add(new GeomForm(x, y, 20,20, col, no));
-        }
-
-        private void fillClick(int x, int y, Color col, int no){
-            x +=  2;
-            y += 2;
-            GFORMARRAYLIST.add(new GeomForm(x, y, 16,16, col, no));
-        }
-
-        private void fillChangePos(int x, int y, boolean forward, Color col, int no){
-            int di;
-            if(forward) di = P.DIRECTION[0];
-            else di = P.DIRECTION[1];
-
-            int move = P.counter;
-
-            switch (di) {
-                case 1: //right
-                    x = x - 30 + move;
-                    //y = y;
-                    break;
-                case 2: //left
-                    x = x + 30 - move;
-                    //y = y;
-                    break;
-                case 3: //top
-                    //x = x;
-                    y = y + 30 - move;
-                    break;
-                case 4: //bottom
-                    //x = x;
-                    y = y - 30 + move;
-                    break;
-            }
-
-            GFORMARRAYLIST.add(new GeomForm(x, y, 20,20, col, no));
-
-        }
 
         private void fillFormList() {
             int xCell = 0, yCell = 0;
@@ -744,7 +657,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                     // remove Col Animation
                     inY = false;
                     for(int i = C.yEnd; i >= 0; i--){
-                        if(i == yCell){
+                        if (i == yCell) {
                             inY = true;
                             break;
                         }
@@ -752,23 +665,123 @@ public class CandyJPanel extends JPanel implements Runnable {
 
                     inX = xCell == C.col;
                     boolean rCol = C.remColAnimation & inY & inX;
+                    if (G.specialGrid[yCell][xCell] == 5) no = -1;
 
+                    if (firstClick) fillClick(x, y, col, no);
+                    else if (changePos) fillChangePos(x, y, forward, col, no);
+                    else if (rRow | rCol) fillRem(x, y, col, no);
+                    else GFORMARRAYLIST.add(new GeomForm(x, y, 20, 20, col, no));
 
-                    if(G.specialGrid[yCell][xCell] == 5) no = -1;
-
-                    if(firstClick)  fillClick(x, y, col, no);
-                    else if(changePos) fillChangePos(x, y, forward, col, no);
-                    else if(rRow) fillRem(x, y, col, no);
-                    else if(rCol) fillRem(x, y, col, no);
-                    else GFORMARRAYLIST.add(new GeomForm(x, y,20,20, col, no));
                     xCell++;
                 }
                 xCell = 0;
                 yCell++;
             }
 
-            if(P.explode) explode();
-            else if(removeAni) removeAnimation();
+            if (P.explode) explode();
+            else if (removeAni) removeAnimation();
         }
+
+        private void fillClick(int x, int y, Color col, int no) {
+            x += 2;
+            y += 2;
+            GFORMARRAYLIST.add(new GeomForm(x, y, 16, 16, col, no));
+        }
+
+        private void fillChangePos(int x, int y, boolean forward, Color col, int no) {
+            int di;
+            if (forward) di = P.DIRECTION[0];
+            else di = P.DIRECTION[1];
+
+            int move = P.counter;
+
+            switch (di) {
+                case 1: // to right
+                    x = x - 30 + move;
+                    break;
+                case 2: // to left
+                    x = x + 30 - move;
+                    break;
+                case 3: // to top
+                    y = y + 30 - move;
+                    break;
+                case 4: // to bottom
+                    y = y - 30 + move;
+                    break;
+            }
+
+            GFORMARRAYLIST.add(new GeomForm(x, y, 20, 20, col, no));
+        }
+
+        private void fillRem(int x, int y, Color col, int no) {
+            y = y + C.rowMove;
+            GFORMARRAYLIST.add(new GeomForm(x, y, 20, 20, col, no));
+        }
+
+        private void explode() {
+            if (explodeCounter == 10) {
+                explodeCounter = 0;
+                P.explode = false;
+                removeAni = true;
+            } else {
+                explodeCounter++;
+
+                if (C.isVertical) {
+                    for (int i = C.yStart; i <= C.yEnd; i++) {
+                        GFORMARRAYLIST.add(new GeomForm(C.col * 30 + 10,
+                                i * 30 + 10,
+                                20,
+                                20,
+                                Color.black,
+                                G.grid[C.yStart][C.col]));
+                    }
+                } else {
+                    for (int i = C.xStart; i <= C.xEnd; i++) {
+                        GFORMARRAYLIST.add(new GeomForm(i * 30 + 10,
+                                C.row * 30 + 10,
+                                20,
+                                20,
+                                Color.black,
+                                G.grid[C.row][C.xStart]));
+                    }
+                }
+            }
+        }
+
+        private void removeAnimation() {
+            if (C.remRowAnimation) {
+                C.remAnimation(true);
+                return;
+            } else if (C.remColAnimation) {
+                C.remAnimation(false);
+                return;
+            }
+
+
+            if (removeCounter == 10 & !C.checkGrid()) {
+                removeAni = false;
+                removeCounter = 0;
+                return;
+            } else if (removeCounter == 10) {
+                removeCounter = 0;
+                return;
+            }
+            if (removeCounter == 0) {
+                if (C.checkHorizontal()) {
+                    C.remRow();
+                    C.rowMove = -30;
+                    C.remRowAnimation = true;
+                    return;
+                } else if (C.checkVertical()) {
+                    C.remCol();
+                    C.rowMove = -30 * (C.yEnd - C.yStart + 1);
+                    C.remColAnimation = true;
+                    return;
+                }
+            }
+            removeCounter++;
+        }
+
     }
+
 }

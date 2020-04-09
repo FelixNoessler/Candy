@@ -55,7 +55,7 @@ public class CandyJFrame extends JFrame {
         // Slider for the number of Colors
         JSlider colSlider = new JSlider(2, 20, colors[0]);
         colSlider.setMinorTickSpacing(1);
-        colSlider.setMajorTickSpacing(5);
+        colSlider.setMajorTickSpacing(2);
         colSlider.setPaintTicks(true);
         colSlider.addChangeListener((ChangeEvent event) -> colors[0] = colSlider.getValue());
         this.add(colSlider);
@@ -88,11 +88,6 @@ public class CandyJFrame extends JFrame {
 
         // start the program
 
-        EventQueue.invokeAndWait(new Runnable(){
-            @Override
-            public void run() {
-                new CandyJFrame();
-            }
-        });
+        EventQueue.invokeAndWait(CandyJFrame::new);
     }
 }
