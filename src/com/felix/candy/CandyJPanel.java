@@ -20,6 +20,7 @@ public class CandyJPanel extends JPanel implements Runnable {
     private final PositionChange P;
     private final GridChecker C;
     private final GameArrays G;
+    private final Animation A;
 
     public CandyJPanel(int ySize, int xSize, int numberOfColors) {
         this.YSIZE = ySize;
@@ -30,6 +31,7 @@ public class CandyJPanel extends JPanel implements Runnable {
         D = new Drawer();
         C = new GridChecker();
         P = new PositionChange();
+        A = new Animation();
 
         initPanel();
     }
@@ -69,17 +71,17 @@ public class CandyJPanel extends JPanel implements Runnable {
 
         C.remove();
 
-        //boolean isRunning = true;
+        boolean isRunning = true;
 
         //System.currentTimeMillis();
 
 
-        while (true) {
+        while (isRunning) {
 
             P.getClicks();
-            P.clickAnimation();
+            A.clickAnimation();
             P.start();
-            P.animation();
+            A.changePosAnimation();
 
             repaint();
 
@@ -106,14 +108,6 @@ public class CandyJPanel extends JPanel implements Runnable {
         private int row, col;
         private boolean isVertical;
 
-        private boolean remColAnimation;
-        private boolean remRowAnimation;
-        private int rowMove;
-
-        private GridChecker() {
-            remRowAnimation = false;
-            remColAnimation = false;
-        }
 
         private boolean checkGrid(){
             // wrapper for the two functions
@@ -171,7 +165,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                         if (horizontalRepeats > 3) xEnd += horizontalRepeats - 3;
                         xStart = (xEnd - (horizontalRepeats - 1));
 
-                        if (horizontalRepeats >= 5) setColorBomb(row, clickInX(xStart, xEnd));
+                        if (horizontalRepeats >= 5) G.setColorBomb(row, clickInX(xStart, xEnd));
 
                         return true; // found 3 or more of the same form/color
                     }
@@ -193,10 +187,14 @@ public class CandyJPanel extends JPanel implements Runnable {
             // changes the grid, removes three or more in one row
             for (int yToTop = row; yToTop >= 0; yToTop--) {
                 for (int xI = xStart; xI <= xEnd; xI++) {
-                    if (yToTop > 0)
+                    if (yToTop > 0) {
                         G.grid[yToTop][xI] = G.grid[yToTop - 1][xI];
-                    if (yToTop == 0)
-                        G.grid[yToTop][xI] = R.nextInt(NUMBERFORMS) + 1;
+                        G.specialGrid[yToTop][xI] = G.specialGrid[yToTop - 1][xI];
+
+                    } else {
+                        G.grid[0][xI] = R.nextInt(NUMBERFORMS) + 1;
+                        G.specialGrid[0][xI] = 0;
+                    }
                 }
             }
         }
@@ -240,7 +238,7 @@ public class CandyJPanel extends JPanel implements Runnable {
                         if (verticalRepeats > 3) yEnd += verticalRepeats - 3;
                         yStart = (yEnd - (verticalRepeats - 1));
 
-                        if (verticalRepeats >= 5) setColorBomb(clickInY(yStart, yEnd), col);
+                        if (verticalRepeats >= 5) G.setColorBomb(clickInY(yStart, yEnd), col);
 
                         return true; // changes!
                     }
@@ -264,49 +262,193 @@ public class CandyJPanel extends JPanel implements Runnable {
             // removes three or more forms in one column
             int dif = yEnd - yStart;
             for (int yToTop = yEnd; yToTop >= 0; yToTop--) {
-                if ((yToTop - dif) >= 0)
+                if ((yToTop - dif) >= 0) {
                     G.grid[yToTop][col] = G.grid[yToTop - dif][col];
-                else
-                    G.grid[yToTop][col] = R.nextInt(NUMBERFORMS) + 1;
+                    G.specialGrid[yToTop][col] = G.specialGrid[yToTop - 1][col];
+
+                } else {
+                    G.grid[0][col] = R.nextInt(NUMBERFORMS) + 1;
+                    G.specialGrid[0][col] = 0;
+                }
+
             }
         }
 
-        private void setColorBomb (int y, int x){
-            G.specialGrid[y][x] = 5;
+
+    }
+
+    private class Animation {
+
+        private final int[] DIRECTION;
+        private boolean clickAnimation;
+        private boolean posAnimation;
+        private boolean turned;
+        private boolean explode;
+        private int posCounter;
+        private int explodeCounter;
+        private int removeCounter;
+        private boolean removeAni;
+
+
+        private boolean remColAnimation;
+        private boolean remRowAnimation;
+        private int rowMove;
+
+        private Animation() {
+            posAnimation = false;
+            turned = false;
+            explode = false;
+            posCounter = 0;
+            DIRECTION = new int[2];
+
+            explodeCounter = 0;
+            removeCounter = 0;
+            removeAni = false;
+
+            remRowAnimation = false;
+            remColAnimation = false;
         }
 
-        private void remAnimation(boolean row){
-            if(rowMove == 0){
-                if(row) remRowAnimation = false;
+        private boolean isClickAnimation(int y, int x) {
+            return P.y1 == y & P.x1 == x & clickAnimation;
+        }
+
+        private void clickAnimation() {
+            clickAnimation = P.XCLICKED.size() == 1 & P.YCLICKED.size() == 1;
+        }
+
+        private boolean[] isChangePosAnimation(int y, int x) {
+            boolean forward = P.y2 == y & P.x2 == x & !turned;
+            boolean back = P.y1 == y & P.x1 == x & turned;
+
+            return new boolean[]{(forward | back) & posAnimation, forward};
+        }
+
+        private void changePosAnimation() {
+            if (posAnimation) {
+                if (posCounter < 30) {
+                    posCounter += 2;
+                } else if (posCounter == 30) {
+                    posCounter = 0;
+
+                    explode = C.checkGrid();
+                    if (explode) {
+                        posAnimation = false;
+                    } else { //change back!
+                        if (turned) {
+                            posAnimation = false;
+                            turned = false;
+                        } else {
+                            turned = true;
+                            P.change();
+
+                            switch (DIRECTION[0]) {
+                                case 1:
+                                    DIRECTION[1] = 2;
+                                    break;
+                                case 2:
+                                    DIRECTION[1] = 1;
+                                    break;
+                                case 3:
+                                    DIRECTION[1] = 4;
+                                    break;
+                                case 4:
+                                    DIRECTION[1] = 3;
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private boolean isRemoveAnimation(int y, int x) {
+            boolean inX = false;
+            for (int i = C.xStart; i <= C.xEnd; i++) {
+                if (x == i) {
+                    inX = true;
+                    break;
+                }
+            }
+
+            boolean inY = false;
+            for (int i = C.row; i >= 0; i--) {
+                if (y == i) {
+                    inY = true;
+                    break;
+                }
+            }
+
+            boolean isRow = remRowAnimation & inY & inX;
+            if (isRow) return true;
+
+
+            inY = false;
+            for (int i = C.yEnd; i >= 0; i--) {
+                if (i == y) {
+                    inY = true;
+                    break;
+                }
+            }
+
+            return remColAnimation & inY & x == C.col;
+        }
+
+
+        private void removeAnimation() {
+            if (remRowAnimation) {
+                countRemoveAnimation(true);
+                return;
+            } else if (remColAnimation) {
+                countRemoveAnimation(false);
+                return;
+            }
+
+            if (removeCounter == 10 & !C.checkGrid()) {
+                removeAni = false;
+                removeCounter = 0;
+                return;
+            } else if (removeCounter == 10) {
+                removeCounter = 0;
+                return;
+            }
+            if (removeCounter == 0) {
+                if (C.checkHorizontal()) {
+                    C.remRow();
+                    rowMove = -30;
+                    remRowAnimation = true;
+                    return;
+                } else if (C.checkVertical()) {
+                    C.remCol();
+                    rowMove = -30 * (C.yEnd - C.yStart + 1);
+                    remColAnimation = true;
+                    return;
+                }
+            }
+            removeCounter++;
+        }
+
+        private void countRemoveAnimation(boolean row) {
+            if (rowMove == 0) {
+                if (row) remRowAnimation = false;
                 else remColAnimation = false;
                 return;
             }
 
-            if(row) rowMove += 5;
+            if (row) rowMove += 5;
             else rowMove += 10;
         }
+
     }
 
 
     private class PositionChange {
         private int x1, y1;
         private int x2, y2;
-        private boolean clickAnimation;
-        private boolean animation;
-        private boolean turned;
-        private boolean explode;
-        private int counter;
-        private final int[] DIRECTION;
+
         private final ArrayList<Integer> XCLICKED = new ArrayList<>();
         private final ArrayList<Integer> YCLICKED = new ArrayList<>();
 
-        private PositionChange(){
-            animation = false;
-            turned = false;
-            explode = false;
-            counter = 0;
-            DIRECTION = new int[2];
-        }
 
         private void getClicks() {
             if (XCLICKED.size() == 1 & YCLICKED.size() == 1) {
@@ -329,8 +471,24 @@ public class CandyJPanel extends JPanel implements Runnable {
             }
         }
 
-        private void clickAnimation() {
-            clickAnimation = XCLICKED.size() == 1 & YCLICKED.size() == 1;
+        private void start() {
+            if (XCLICKED.size() == 2 & YCLICKED.size() == 2) {
+
+                change();
+                A.posAnimation = true;
+
+                //toRight
+                if (x2 > x1) A.DIRECTION[0] = 1;
+                    //toLeft
+                else if (x2 < x1) A.DIRECTION[0] = 2;
+                    //toTop
+                else if (y2 < y1) A.DIRECTION[0] = 3;
+                    //toBottom
+                else if (y2 > y1) A.DIRECTION[0] = 4;
+
+                XCLICKED.clear();
+                YCLICKED.clear();
+            }
         }
 
         private boolean isNeighbour() {
@@ -361,64 +519,6 @@ public class CandyJPanel extends JPanel implements Runnable {
             G.specialGrid[y2][x2] = save;
         }
 
-        private void start() {
-            if (XCLICKED.size() == 2 & YCLICKED.size() == 2) {
-
-                change();
-                animation = true;
-
-                //toRight
-                if (x2 > x1) DIRECTION[0] = 1;
-                //toLeft
-                else if (x2 < x1) DIRECTION[0] = 2;
-                //toTop
-                else if (y2 < y1) DIRECTION[0] = 3;
-                //toBottom
-                else if (y2 > y1) DIRECTION[0] = 4;
-
-                XCLICKED.clear();
-                YCLICKED.clear();
-            }
-        }
-
-        private void animation() {
-            if (animation) {
-                if (counter < 30) {
-                    counter += 2;
-                } else if (counter == 30) {
-                    counter = 0;
-
-                    explode = C.checkGrid();
-                    if(explode) {
-                        animation = false;
-                    }
-                    else{ //change back!
-                        if(turned){
-                            animation = false;
-                            turned = false;
-                        }else{
-                            turned = true;
-                            change();
-
-                            switch(DIRECTION[0]){
-                                case 1:
-                                    DIRECTION[1] = 2;
-                                    break;
-                                case 2:
-                                    DIRECTION[1] = 1;
-                                    break;
-                                case 3:
-                                    DIRECTION[1] = 4;
-                                    break;
-                                case 4:
-                                    DIRECTION[1] = 3;
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private class GameArrays {
@@ -485,6 +585,14 @@ public class CandyJPanel extends JPanel implements Runnable {
             }
         }
 
+        private void setColorBomb(int y, int x) {
+            G.specialGrid[y][x] = 5;
+        }
+
+        private boolean isColorBomb(int y, int x) {
+            return specialGrid[y][x] == 5;
+        }
+
     }
 
     private static class GeomForm {
@@ -508,117 +616,11 @@ public class CandyJPanel extends JPanel implements Runnable {
     private class Drawer {
 
         private final ArrayList<GeomForm> GFORMARRAYLIST = new ArrayList<>();
-        private int explodeCounter;
-        private int removeCounter;
-        private boolean removeAni;
 
-
-        private Drawer(){
-            explodeCounter = 0;
-            removeCounter = 0;
-            removeAni = false;
-        }
 
         private void clearFormList(){
             GFORMARRAYLIST.clear();
         }
-
-        private void drawForm(Graphics g){
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            for (GeomForm i : GFORMARRAYLIST) {
-                g2d.setPaint(i.COLOR);
-
-                if(i.FORM == -1){
-                    g2d.setPaint(Color.black);
-                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH*0.5, i.HEIGHT*0.5);
-                    g2d.fill(rect);
-
-                    g2d.setPaint(i.COLOR);
-                    rect = new Rectangle2D.Double(i.X+i.WIDTH*0.5, i.Y, i.WIDTH*0.5, i.HEIGHT*0.5);
-                    g2d.fill(rect);
-
-                    g2d.setPaint(i.COLOR);
-                    rect = new Rectangle2D.Double(i.X, i.Y+i.WIDTH*0.5, i.WIDTH*0.5, i.HEIGHT*0.5);
-                    g2d.fill(rect);
-
-                    g2d.setPaint(Color.black);
-                    rect = new Rectangle2D.Double(i.X+i.WIDTH*0.5, i.Y+i.WIDTH*0.5, i.WIDTH*0.5, i.HEIGHT*0.5);
-                    g2d.fill(rect);
-
-                } else if (G.geomArray[i.FORM] == 0){
-                    Ellipse2D circle = new Ellipse2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
-                    g2d.fill(circle);
-                    g2d.setColor(Color.gray);
-                    g2d.draw(circle);
-
-                } else if (G.geomArray[i.FORM] == 1){
-                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
-                    g2d.fill(rect);
-                    g2d.setPaint(Color.gray);
-                    g2d.draw(rect);
-
-                } else if (G.geomArray[i.FORM] == 2){
-                    int[] xTriangle = new int[3];
-                    xTriangle[0] = i.X+i.WIDTH/2;
-                    xTriangle[1] = i.X+i.WIDTH;
-                    xTriangle[2] = i.X;
-
-                    int[] yTriangle = new int[3];
-                    yTriangle[0] = i.Y;
-                    yTriangle[1] = i.Y+i.HEIGHT;
-                    yTriangle[2] = i.Y+i.HEIGHT;
-
-                    Polygon poly = new Polygon(xTriangle, yTriangle, 3);
-                    g2d.fillPolygon(poly);
-                    g2d.setPaint(Color.gray);
-                    g2d.drawPolygon(poly);
-
-                } else if(G.geomArray[i.FORM] == 3){
-                    int[] xPoly = new int[4];
-                    xPoly[0] = i.X+i.WIDTH/2;
-                    xPoly[1] = i.X+i.WIDTH;
-                    xPoly[2] = i.X+i.WIDTH/2;
-                    xPoly[3] = i.X;
-
-                    int[] yPoly = new int[4];
-                    yPoly[0] = i.Y;
-                    yPoly[1] = i.Y+i.HEIGHT/2;
-                    yPoly[2] = i.Y+i.HEIGHT;
-                    yPoly[3] = i.Y+i.HEIGHT/2;
-
-                    Polygon poly = new Polygon(xPoly, yPoly, 4);
-                    g2d.fillPolygon(poly);
-                    g2d.setPaint(Color.gray);
-                    g2d.drawPolygon(poly);
-
-                }else if(G.geomArray[i.FORM] == 4){
-                    int[] xPoly = new int[6];
-                    xPoly[0] = i.X+i.WIDTH/4;
-                    xPoly[1] = i.X+i.WIDTH*3/4;
-                    xPoly[2] = i.X+i.WIDTH;
-                    xPoly[3] = i.X+i.WIDTH;
-                    xPoly[4] = i.X;
-                    xPoly[5] = i.X;
-
-                    int[] yPoly = new int[6];
-                    yPoly[0] = i.Y;
-                    yPoly[1] = i.Y;
-                    yPoly[2] = i.Y+i.HEIGHT/4;
-                    yPoly[3] = i.Y+i.HEIGHT*3/4;
-                    yPoly[4] = i.Y+i.HEIGHT*3/4;
-                    yPoly[5] = i.Y+i.HEIGHT/4;
-
-                    Polygon poly = new Polygon(xPoly, yPoly, 6);
-                    g2d.fillPolygon(poly);
-                    g2d.setPaint(Color.gray);
-                    g2d.drawPolygon(poly);
-
-                }
-            }
-        }
-
 
         private void fillFormList() {
             int xCell = 0, yCell = 0;
@@ -631,45 +633,15 @@ public class CandyJPanel extends JPanel implements Runnable {
                     int no = G.grid[yCell][xCell];
                     Color col = G.colorArray[no];
 
-                    boolean firstClick = P.y1 == yCell & P.x1 == xCell & P.clickAnimation;
-                    boolean forward = P.y2 == yCell & P.x2 == xCell & !P.turned;
-                    boolean back = P.y1 == yCell & P.x1 == xCell & P.turned;
-                    boolean changePos = (forward | back) & P.animation;
+                    boolean firstClick = A.isClickAnimation(yCell, xCell);
+                    boolean[] changePos = A.isChangePosAnimation(yCell, xCell);
+                    boolean r1 = A.isRemoveAnimation(yCell, xCell);
 
-
-                    // remove Row Animation
-                    boolean inX = false;
-                    for(int i = C.xStart; i <= C.xEnd; i++){
-                        if(xCell == i) {
-                            inX = true;
-                            break;
-                        }
-                    }
-                    boolean inY = false;
-                    for(int i = C.row; i >= 0; i--){
-                        if(yCell == i) {
-                            inY = true;
-                            break;
-                        }
-                    }
-                    boolean rRow = C.remRowAnimation & inY & inX;
-
-                    // remove Col Animation
-                    inY = false;
-                    for(int i = C.yEnd; i >= 0; i--){
-                        if (i == yCell) {
-                            inY = true;
-                            break;
-                        }
-                    }
-
-                    inX = xCell == C.col;
-                    boolean rCol = C.remColAnimation & inY & inX;
-                    if (G.specialGrid[yCell][xCell] == 5) no = -1;
+                    if (G.isColorBomb(yCell, xCell)) no = -1;
 
                     if (firstClick) fillClick(x, y, col, no);
-                    else if (changePos) fillChangePos(x, y, forward, col, no);
-                    else if (rRow | rCol) fillRem(x, y, col, no);
+                    else if (changePos[0]) fillChangePos(x, y, changePos[1], col, no);
+                    else if (r1) fillRem(x, y, col, no);
                     else GFORMARRAYLIST.add(new GeomForm(x, y, 20, 20, col, no));
 
                     xCell++;
@@ -678,8 +650,8 @@ public class CandyJPanel extends JPanel implements Runnable {
                 yCell++;
             }
 
-            if (P.explode) explode();
-            else if (removeAni) removeAnimation();
+            if (A.explode) explode();
+            else if (A.removeAni) A.removeAnimation();
         }
 
         private void fillClick(int x, int y, Color col, int no) {
@@ -690,10 +662,10 @@ public class CandyJPanel extends JPanel implements Runnable {
 
         private void fillChangePos(int x, int y, boolean forward, Color col, int no) {
             int di;
-            if (forward) di = P.DIRECTION[0];
-            else di = P.DIRECTION[1];
+            if (forward) di = A.DIRECTION[0];
+            else di = A.DIRECTION[1];
 
-            int move = P.counter;
+            int move = A.posCounter;
 
             switch (di) {
                 case 1: // to right
@@ -714,72 +686,127 @@ public class CandyJPanel extends JPanel implements Runnable {
         }
 
         private void fillRem(int x, int y, Color col, int no) {
-            y = y + C.rowMove;
+            y = y + A.rowMove;
             GFORMARRAYLIST.add(new GeomForm(x, y, 20, 20, col, no));
         }
 
         private void explode() {
-            if (explodeCounter == 10) {
-                explodeCounter = 0;
-                P.explode = false;
-                removeAni = true;
+            // make the forms black
+            // after 10 steps calls removeAnimation() in fillFormList()
+            // though removeAni = true
+
+            if (A.explodeCounter == 10) {
+                A.explodeCounter = 0;
+                A.explode = false;
+                A.removeAni = true;
             } else {
-                explodeCounter++;
+                A.explodeCounter++;
 
                 if (C.isVertical) {
                     for (int i = C.yStart; i <= C.yEnd; i++) {
+                        Color c1 = Color.black;
+                        int n1 = G.grid[C.yStart][C.col];
+                        if (G.isColorBomb(i, C.col)) {
+                            c1 = Color.yellow;
+                            n1 = -1;
+                        }
+
                         GFORMARRAYLIST.add(new GeomForm(C.col * 30 + 10,
                                 i * 30 + 10,
                                 20,
                                 20,
-                                Color.black,
-                                G.grid[C.yStart][C.col]));
+                                c1,
+                                n1));
                     }
                 } else {
                     for (int i = C.xStart; i <= C.xEnd; i++) {
+                        Color c1 = Color.black;
+                        int n1 = G.grid[C.row][C.xStart];
+                        if (G.isColorBomb(C.row, i)) {
+                            c1 = Color.yellow;
+                            n1 = -1;
+                        }
+
                         GFORMARRAYLIST.add(new GeomForm(i * 30 + 10,
                                 C.row * 30 + 10,
                                 20,
                                 20,
-                                Color.black,
-                                G.grid[C.row][C.xStart]));
+                                c1,
+                                n1));
                     }
                 }
             }
         }
 
-        private void removeAnimation() {
-            if (C.remRowAnimation) {
-                C.remAnimation(true);
-                return;
-            } else if (C.remColAnimation) {
-                C.remAnimation(false);
-                return;
-            }
 
+        private void drawForm(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            if (removeCounter == 10 & !C.checkGrid()) {
-                removeAni = false;
-                removeCounter = 0;
-                return;
-            } else if (removeCounter == 10) {
-                removeCounter = 0;
-                return;
-            }
-            if (removeCounter == 0) {
-                if (C.checkHorizontal()) {
-                    C.remRow();
-                    C.rowMove = -30;
-                    C.remRowAnimation = true;
-                    return;
-                } else if (C.checkVertical()) {
-                    C.remCol();
-                    C.rowMove = -30 * (C.yEnd - C.yStart + 1);
-                    C.remColAnimation = true;
-                    return;
+            for (GeomForm i : GFORMARRAYLIST) {
+                g2d.setPaint(i.COLOR);
+
+                if (i.FORM == -1) {
+                    g2d.setPaint(Color.black);
+                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH * 0.5, i.HEIGHT * 0.5);
+                    g2d.fill(rect);
+
+                    g2d.setPaint(i.COLOR);
+                    rect = new Rectangle2D.Double(i.X + i.WIDTH * 0.5, i.Y, i.WIDTH * 0.5, i.HEIGHT * 0.5);
+                    g2d.fill(rect);
+
+                    g2d.setPaint(i.COLOR);
+                    rect = new Rectangle2D.Double(i.X, i.Y + i.WIDTH * 0.5, i.WIDTH * 0.5, i.HEIGHT * 0.5);
+                    g2d.fill(rect);
+
+                    g2d.setPaint(Color.black);
+                    rect = new Rectangle2D.Double(i.X + i.WIDTH * 0.5, i.Y + i.WIDTH * 0.5, i.WIDTH * 0.5, i.HEIGHT * 0.5);
+                    g2d.fill(rect);
+
+                } else if (G.geomArray[i.FORM] == 0) {
+                    Ellipse2D circle = new Ellipse2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
+                    g2d.fill(circle);
+                    g2d.setColor(Color.gray);
+                    g2d.draw(circle);
+
+                } else if (G.geomArray[i.FORM] == 1) {
+                    Rectangle2D rect = new Rectangle2D.Double(i.X, i.Y, i.WIDTH, i.HEIGHT);
+                    g2d.fill(rect);
+                    g2d.setPaint(Color.gray);
+                    g2d.draw(rect);
+
+                } else if (G.geomArray[i.FORM] == 2) {
+                    int[] xTriangle = {i.X + i.WIDTH / 2, i.X + i.WIDTH, i.X};
+                    int[] yTriangle = {i.Y, i.Y + i.HEIGHT, i.Y + i.HEIGHT};
+
+                    Polygon poly = new Polygon(xTriangle, yTriangle, 3);
+                    g2d.fillPolygon(poly);
+                    g2d.setPaint(Color.gray);
+                    g2d.drawPolygon(poly);
+
+                } else if (G.geomArray[i.FORM] == 3) {
+                    int[] xPoly = {i.X + i.WIDTH / 2, i.X + i.WIDTH, i.X + i.WIDTH / 2, i.X};
+                    int[] yPoly = {i.Y, i.Y + i.HEIGHT / 2, i.Y + i.HEIGHT, i.Y + i.HEIGHT / 2};
+
+                    Polygon poly = new Polygon(xPoly, yPoly, 4);
+                    g2d.fillPolygon(poly);
+                    g2d.setPaint(Color.gray);
+                    g2d.drawPolygon(poly);
+
+                } else if (G.geomArray[i.FORM] == 4) {
+                    int[] xPoly = {i.X + i.WIDTH / 4, i.X + i.WIDTH * 3 / 4,
+                            i.X + i.WIDTH, i.X + i.WIDTH, i.X, i.X};
+
+                    int[] yPoly = {i.Y, i.Y, i.Y + i.HEIGHT / 4, i.Y + i.HEIGHT * 3 / 4,
+                            i.Y + i.HEIGHT * 3 / 4, i.Y + i.HEIGHT / 4};
+
+                    Polygon poly = new Polygon(xPoly, yPoly, 6);
+                    g2d.fillPolygon(poly);
+                    g2d.setPaint(Color.gray);
+                    g2d.drawPolygon(poly);
+
                 }
             }
-            removeCounter++;
         }
 
     }
